@@ -1,5 +1,4 @@
-import java.util.UUID;
-import java.util.Date;
+import java.util.*;
 
 public class Song {
     private String id;
@@ -21,6 +20,29 @@ public class Song {
     private Date createdAt;
     private Date updatedAt;
 
+    private boolean isShareable;
+
+    private Set<User> likedByUsers;
+
+    public Song(String id, String title, String artist, String album, String genre, int duration, int year, String filePath, String coverArtUrl, String lyrics, long playCount, int likes, Date createdAt, Date updatedAt, boolean isShareable, Set<User> likedByUsers) {
+        this.id = id;
+        this.title = title;
+        this.artist = artist;
+        this.album = album;
+        this.genre = genre;
+        this.duration = duration;
+        this.year = year;
+        this.filePath = filePath;
+        this.coverArtUrl = coverArtUrl;
+        this.lyrics = lyrics;
+        this.playCount = playCount;
+        this.likes = likes;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.isShareable = isShareable;
+        this.likedByUsers = likedByUsers;
+    }
+
     public Song(String title, String artist, String album, String genre, int duration, int year, String filePath, String coverArtUrl, String lyrics) {
         this.title = title;
         this.artist = artist;
@@ -31,6 +53,26 @@ public class Song {
         this.filePath = filePath;
         this.coverArtUrl = coverArtUrl;
         this.lyrics = lyrics;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Song song = (Song) o;
+        return getDuration() == song.getDuration() && getYear() == song.getYear() && getPlayCount() == song.getPlayCount()
+                && getLikes() == song.getLikes() && isShareable == song.isShareable && Objects.equals(getId(), song.getId())
+                && Objects.equals(getTitle(), song.getTitle()) && Objects.equals(getArtist(), song.getArtist()) &&
+                Objects.equals(getAlbum(), song.getAlbum()) && Objects.equals(getGenre(), song.getGenre()) &&
+                Objects.equals(getFilePath(), song.getFilePath()) && Objects.equals(getCoverArtUrl(), song.getCoverArtUrl())
+                && Objects.equals(getLyrics(), song.getLyrics()) && Objects.equals(getCreatedAt(), song.getCreatedAt()) &&
+                Objects.equals(getUpdatedAt(), song.getUpdatedAt()) && Objects.equals(getLikedByUsers(), song.getLikedByUsers());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getTitle(), getArtist(), getAlbum(), getGenre(), getDuration(), getYear(),
+                getFilePath(), getCoverArtUrl(), getLyrics(), getPlayCount(), getLikes(), getCreatedAt(), getUpdatedAt(),
+                isShareable, getLikedByUsers());
     }
 
     public String getTitle() {
@@ -85,8 +127,16 @@ public class Song {
         return updatedAt;
     }
 
+    public boolean getIsShareable() {
+        return isShareable;
+    }
+
     public String getId() {
         return id;
+    }
+
+    public Set<User> getLikedByUsers() {
+        return likedByUsers;
     }
 
     public void setId(String id) {
@@ -143,5 +193,27 @@ public class Song {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setIsShareable(boolean isShareable) {
+        this.isShareable = isShareable;
+    }
+
+    public void setLikedByUsers(Set<User> likedByUsers) {
+        this.likedByUsers = likedByUsers;
+    }
+
+    public void addLike(User user) {
+        if(user != null && user.getLikedSongs() != null) {
+            user.getLikedSongs().add(this);
+            likedByUsers.add(user);
+        }
+    }
+
+    public void removeLike(User user) {
+        if(user != null && user.getLikedSongs() != null) {
+            user.getLikedSongs().remove(this);
+            likedByUsers.remove(user);
+        }
     }
 }
