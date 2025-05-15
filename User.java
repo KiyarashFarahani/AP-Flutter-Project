@@ -61,7 +61,7 @@ public class User {
     public void downloadSong(Song song){
         downloadedSongs.put(song, LocalTime.now());
     }
-    public void setProfilePicture()
+    public void setProfilePicture(){}
     public void toggleLike(Song song){
         if(likedSongs.contains(song))
             likedSongs.remove(song);
@@ -69,7 +69,7 @@ public class User {
             likedSongs.add(song);
     }
     public boolean addPlaylist(String name){
-       return playlists.add(new Playlist(name));
+       return playlists.add(new Playlist(name, this));
     }
     public void removePlaylist(String name){
         for(Playlist p: playlists){
