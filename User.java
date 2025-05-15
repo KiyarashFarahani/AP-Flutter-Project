@@ -95,10 +95,10 @@ public class User {
         return null;
     }
     public void disableSharePermission(){
-        sharePermission= false;
+        sharePermission = false;
     }
     public void enableSharePermission(){
-        sharePermission= true;
+        sharePermission = true;
     }
     public void deleteAccount(String userName, String password){
         if(userName.equals(this.userName)&& password.equals(this.password))
