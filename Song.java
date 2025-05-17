@@ -25,7 +25,7 @@ public class Song {
     private Set<User> likedByUsers;
 
     public Song(String id, String title, String artist, String album, String genre, int duration, int year, String filePath, String coverArtUrl, String lyrics, long playCount, int likes, Date createdAt, Date updatedAt, boolean isShareable, Set<User> likedByUsers) {
-        this.id = id;
+        this.id = UUID.randomUUID().toString();
         this.title = title;
         this.artist = artist;
         this.album = album;
@@ -59,20 +59,12 @@ public class Song {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Song song = (Song) o;
-        return getDuration() == song.getDuration() && getYear() == song.getYear() && getPlayCount() == song.getPlayCount()
-                && getLikes() == song.getLikes() && isShareable == song.isShareable && Objects.equals(getId(), song.getId())
-                && Objects.equals(getTitle(), song.getTitle()) && Objects.equals(getArtist(), song.getArtist()) &&
-                Objects.equals(getAlbum(), song.getAlbum()) && Objects.equals(getGenre(), song.getGenre()) &&
-                Objects.equals(getFilePath(), song.getFilePath()) && Objects.equals(getCoverArtUrl(), song.getCoverArtUrl())
-                && Objects.equals(getLyrics(), song.getLyrics()) && Objects.equals(getCreatedAt(), song.getCreatedAt()) &&
-                Objects.equals(getUpdatedAt(), song.getUpdatedAt()) && Objects.equals(getLikedByUsers(), song.getLikedByUsers());
+        return this.id.equals(((Song) o).id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getTitle(), getArtist(), getAlbum(), getGenre(), getDuration(), getYear(),
-                getFilePath(), getCoverArtUrl(), getLyrics(), getPlayCount(), getLikes(), getCreatedAt(), getUpdatedAt(),
-                isShareable, getLikedByUsers());
+        return Objects.hash(id);
     }
 
     public String getTitle() {
