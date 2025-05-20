@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:mono/signup.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -31,7 +32,7 @@ class _LoginState extends State<Login> {
       // network request
       await Future.delayed(const Duration(seconds: 2));
 
-      // Replace with your actual authentication logic
+      // authentication logic
       print('Email: ${_emailController.text}');
       print('Password: ${_passwordController.text}');
 
@@ -68,7 +69,7 @@ class _LoginState extends State<Login> {
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(color: Colors.black.withOpacity(0.2)),
           ),
-          // Main content
+
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -95,10 +96,10 @@ class _LoginState extends State<Login> {
                       ],
                     ),
 
-                    // Title
+
                     const SizedBox(height: 48),
                     Text(
-                      'Sign in to continue',
+                      'Login to continue',
                       style: textTheme.titleSmall?.copyWith(
                         color: Colors.white70,
                       ),
@@ -106,7 +107,7 @@ class _LoginState extends State<Login> {
                     ),
                     const SizedBox(height: 18),
 
-                    // Email Field
+
                     TextFormField(
                       controller: _emailController,
                       decoration: InputDecoration(
@@ -151,7 +152,7 @@ class _LoginState extends State<Login> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Password Field
+
                     TextFormField(
                       controller: _passwordController,
                       decoration: InputDecoration(
@@ -210,12 +211,12 @@ class _LoginState extends State<Login> {
                     ),
                     const SizedBox(height: 8),
 
-                    // Forgot Password
+
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          // Handle forgot password
+
                         },
                         child: Text(
                           'Forgot Password?',
@@ -225,37 +226,37 @@ class _LoginState extends State<Login> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Login Button
+
                     _isLoading
                         ? Center(
-                          child: CircularProgressIndicator(
-                            color: colorScheme.primary,
-                          ),
-                        )
+                      child: CircularProgressIndicator(
+                        color: colorScheme.primary,
+                      ),
+                    )
                         : FilledButton(
-                          onPressed: _login,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: colorScheme.primary,
-                            foregroundColor: colorScheme.onPrimary,
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16.0),
-                            ),
-                            textStyle: textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          child: Text(
-                            'Login',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: colorScheme.onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      onPressed: _login,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.0),
                         ),
+                        textStyle: textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: Text(
+                        'Login',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
 
-                    // Sign Up Option
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -265,7 +266,10 @@ class _LoginState extends State<Login> {
                         ),
                         TextButton(
                           onPressed: () {
-                            // Navigate to sign up page
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SignUp()),
+                            );
                           },
                           child: Text(
                             'Sign Up',
