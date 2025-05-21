@@ -147,4 +147,36 @@ Allows an authenticated user to change their username, as long as the new userna
 }
 ```
 
-## 
+## Add songs to account
+
+Allows an authenticated user to add one or more existing songs from the server’s library to their personal account or playlist. The client sends a list of song IDs to be added.
+
+### Client Request
+
+```json
+{
+  "action": "add_song",
+  "token": "abc.def.ghi",
+  "data": {
+    "song_id": "sing123"
+  }
+}
+```
+
+### Server Response(success)
+
+```json
+{
+  "status": "success",
+  "message": "Songs added successfully to your account"
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "One or more songs could not be added"
+}
+```
