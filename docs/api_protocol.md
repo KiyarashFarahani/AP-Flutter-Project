@@ -48,7 +48,7 @@ Authenticates a user by verifying the username and password. Returns an authenti
 ```json
 {
   "action": "log_in",
-  "data":{
+  "data": {
     "username": "Biboo@gmail.com",
     "password": "cnwiuD52_do"
   }
@@ -62,7 +62,7 @@ Authenticates a user by verifying the username and password. Returns an authenti
   "status": "success",
   "data": {
     "user_id": "u123",
-    "message": "Lgged in successfuly",
+    "message": "Logged in successfuly",
     "token": "abc.def.ghi"
   }
 }
@@ -86,7 +86,7 @@ Allows an authenticated user to update their password by providing the old passw
 ```json
 {
   "action": "change_password",
-  "token": "abc.def.ghi", 
+  "token": "abc.def.ghi",
   "data": {
     "old_password": "cnwiuD52_do",
     "new_password": "bcawjS315_p",
@@ -122,7 +122,7 @@ Allows an authenticated user to change their username, as long as the new userna
 ```json
 {
   "action": "change_username",
-  "token": "abc.def.ghi", 
+  "token": "abc.def.ghi",
   "data": {
     "new_username": "Didoo@gmail.com"
   }
@@ -178,5 +178,114 @@ Allows an authenticated user to add one or more existing songs from the serverâ€
 {
   "status": "error",
   "message": "One or more songs could not be added"
+}
+```
+
+## Log Out
+
+Logs the user out by invalidating the current authentication token on the server (if you're tracking tokens), or simply instructs the client to delete the stored token. Since the server is stateless in your design, it may not need to store token stateâ€”but this action is still useful for the client to clean up and signal intent to log out
+
+### Client Request
+
+```json
+{
+  "action": "log_out",
+  "token": "abc.def.ghi"
+}
+```
+
+### Server Response(success)
+
+```json
+{
+  "status": "success",
+  "message": "Logged out successfuly"
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "Invalid token"
+}
+```
+
+## Delete Account
+
+Allows an authenticated user to permanently delete their account. This action requires a valid token, and reconfirming their password for security.
+
+### Client Request
+
+```json
+{
+  "action": "delete_account",
+  "token": "abc.def.ghi",
+  "data": {
+    "password": "bcawjS315_p"
+  }
+}
+```
+
+### Server Response(success)
+
+```json
+{
+  "status": "success",
+  "message": "Account deleted successfully"
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "Password is incorrect"
+}
+```
+
+## Share Song
+
+Allows one user to share a song from their account with another user, if the recipient allows it via their account settings.
+
+### Client Request
+
+```json
+{
+  "action": "share_song",
+  "token": "abc.def.ghi",
+  "data": {
+    "recipient_username": "didoo@gmail.com",
+    "song_id": "song123"
+  }
+}
+```
+
+### Server Response(success)
+
+```json
+{
+  "status": "success",
+  "message": "Song shared with didoo@gmail.com"
+}
+```
+
+### Server Response(error: sharing not allowed)
+
+```json
+{
+  "status": "error",
+  "message": "Recipient has not enabled song sharing"
+}
+```
+
+### Server Response(error: recipient not found)
+
+```json
+{
+  "status": "success",
+  "message": "Recipient user not found"
 }
 ```
