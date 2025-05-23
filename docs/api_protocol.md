@@ -289,3 +289,53 @@ Allows one user to share a song from their account with another user, if the rec
   "message": "Recipient user not found"
 }
 ```
+## Share Playlist
+
+### Client Request
+
+```json
+{
+  "action": "share_playlist",
+  "token": "abc.def.ghi",
+  "data": {
+    "recipient_username": "didoo@gmail.com",
+    "playlist_id": "pl_456"
+  }
+}
+```
+
+### Server Response(success)
+
+```json
+{
+  "status": "success",
+  "message": "Playlist shared with didoo@gmail.com"
+}
+```
+
+### Server Response(error: Recipient Not Found)
+
+```json
+{
+  "status": "error",
+  "messgae": "Recipient not found"
+}
+```
+
+### Server Response(error: Sharing Disabled)
+
+```json
+{
+  "status": "error",
+  "message": "Recipient has disabled sharing"
+}
+```
+
+### Server Response(error: Playlist Not Found / Unauthorized)
+
+```json
+{
+  "status": "error",
+  "message": "Playlist not found or does not belong to you"
+}
+```
