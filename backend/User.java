@@ -1,3 +1,6 @@
+package backend;
+
+import backend.Theme;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.time.LocalTime;
@@ -7,6 +10,7 @@ public class User {
     private String userName;
     private String password;
     private String email;
+    private Theme theme;
     private boolean sharePermission;
     private boolean validUsername;
     private boolean validPassword;
@@ -23,6 +27,7 @@ public class User {
         this.userName= userName;
         this.password= password;
         this.email= email;
+        this.theme= Theme.LIGHT;
         sharePermission= true;
         doesExist= true;
         likedSongs= new HashSet<>();
@@ -67,6 +72,9 @@ public class User {
             likedSongs.remove(song);
         else
             likedSongs.add(song);
+    }
+    public void setTheme(Theme theme){
+        this.theme= theme;
     }
     public boolean addPlaylist(String name){
        return playlists.add(new Playlist(name, this));
