@@ -429,3 +429,37 @@ Also updates the global like count of the song.
   "message": "Song not found" // or "Invalid token or unauthorized"
 }
 ```
+
+## set Dark/Light Mode
+
+This action allows the user to set their preferred UI theme — either dark mode or light mode — which the frontend app will apply.
+
+### Client Request
+
+```json
+{
+  "action": "set_mode",
+  "token": "abc.def.ghi",
+  "data": {
+     "theme": "dark"   // or "light"
+  }
+}
+```
+
+### Srver Response(success)
+
+```json
+{
+  "status": "success",
+  "message": "Theme updated successfully"
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "Invalid theme option"
+}
+```
