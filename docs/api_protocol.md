@@ -463,3 +463,117 @@ This action allows the user to set their preferred UI theme — either dark mode
   "message": "Invalid theme option"
 }
 ```
+
+## Add Songs To Playlist
+
+Adds one or more songs to a specific playlist owned by the user. The playlist must exist and belong to the user. The song(s) must exist on the server.
+
+### Client Request
+
+```json
+{
+  "action": "add_song_to_playlist",
+  "token": "abc.def.ghi",
+  "data": {
+     "playlist_id": "pl123",
+    "song_ids": ["song123", "song456"]
+  }
+}
+```
+
+### Server Response(success)
+
+```json
+{
+  "status": "success",
+    "message": "Songs added to playlist",
+  "data": {
+    "playlist_id": "pl_456",
+    "added_songs": ["song_123", "song_789"]
+  }
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "Playlist not found" 
+}
+```
+
+## Delete Song From Playlist
+
+Allows the user to remove a specific song from one of their playlists. The client sends the playlist ID and the song ID to be removed. The server verifies ownership and updates the playlist accordingly.
+
+### Client Request
+
+```json
+{
+    "action": "delete_song_from_playlist",
+  "token": "abc.def.ghi",
+  "data": {
+    "playlist_id": "pl123",
+    "song_id": "song456"
+  }
+}
+```
+
+### Server Response(success)
+
+```json
+{
+    "status": "success",
+  "message": "Song removed from playlist successfully"
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "Playlist not found"
+}
+```
+
+### Create New Playlist
+
+Allows a user to create a new playlist by providing a playlist name. The server creates the playlist linked to the user’s account.
+
+### Client Request
+
+```json
+{
+  "action": "create_playlist",
+  "token": "abc.def.ghi",
+  "data": {
+    "name": "My Favorite Songs"
+  }
+}
+```
+
+### Server Response(success)
+
+```json
+{
+    "status": "success",
+  "data": {
+    "playlist_id": "pl789",
+    "message": "Playlist created successfully"
+  }
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "You already have a playlist with this name"
+}
+```
+
+
+
