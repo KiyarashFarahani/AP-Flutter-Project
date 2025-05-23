@@ -339,3 +339,37 @@ Allows one user to share a song from their account with another user, if the rec
   "message": "Playlist not found or does not belong to you"
 }
 ```
+
+## Set Sharing Permission
+
+Allows a user to enable or disable the permission for other users to share songs or playlists with them. This is stored as a boolean flag in the user’s account(sharePermission).
+
+### Client Request
+
+```json
+{
+  "action": "set_sharing_permission",
+  "token": "abc.def.ghi",
+  "data": {
+      "sharePermission": true //or false
+  }
+}
+```
+
+### Server Response(success)
+
+```json
+{
+  "status": "success",
+  "message": "Sharing permission updated successfully"
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "Invalid token or unauthorized"
+}
+```
