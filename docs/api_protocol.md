@@ -289,6 +289,7 @@ Allows one user to share a song from their account with another user, if the rec
   "message": "Recipient user not found"
 }
 ```
+
 ## Share Playlist
 
 ### Client Request
@@ -351,7 +352,7 @@ Allows a user to enable or disable the permission for other users to share songs
   "action": "set_sharing_permission",
   "token": "abc.def.ghi",
   "data": {
-      "sharePermission": true //or false
+    "sharePermission": true // or false
   }
 }
 ```
@@ -371,5 +372,60 @@ Allows a user to enable or disable the permission for other users to share songs
 {
   "status": "error",
   "message": "Invalid token or unauthorized"
+}
+```
+
+## Toggle Like Song
+
+Toggles the "like" status of a song:
+If the user already liked it → remove the like (unlike); If the user hasn't liked it → add the like.
+Also updates the global like count of the song.
+
+### Client Request
+
+```json
+{
+  "action": "toggle_like_song",
+  "token": "abc.def.ghi",
+  "data": {
+    "song_id": "song123"
+  }
+}
+```
+
+### Server Response(success: Like)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "song_id": "song123",
+    "liked": true,
+    "likes": 154
+  },
+  "message": "Song liked"
+}
+```
+
+### Server Response(success: Unlike)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "song_id": "song123",
+    "liked": false,
+    "likes": 153
+  },
+  "message": "Song unliked"
+}
+```
+
+### Server Response(error)
+
+```json
+{
+  "status": "error",
+  "message": "Song not found" // or "Invalid token or unauthorized"
 }
 ```
