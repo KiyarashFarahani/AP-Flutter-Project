@@ -197,16 +197,20 @@ public class Song {
     }
 
     public void addLike(User user) {
-        if(user != null && user.getLikedSongs() != null) {
-            user.getLikedSongs().add(this);
-            likedByUsers.add(user);
-        }
+        validateUser(user);
+        user.getLikedSongs().add(this);
+        likedByUsers.add(user);
     }
 
     public void removeLike(User user) {
-        if(user != null && user.getLikedSongs() != null) {
-            user.getLikedSongs().remove(this);
-            likedByUsers.remove(user);
+        validateUser(user);
+        user.getLikedSongs().remove(this);
+        likedByUsers.remove(user);
+    }
+
+    private void validateUser(User user) {
+        if (user == null) {
+            throw new UserNullException("User is null!");
         }
     }
 }

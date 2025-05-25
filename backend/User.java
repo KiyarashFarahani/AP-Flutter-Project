@@ -24,15 +24,15 @@ public class User {
         validUsername(userName);
         validPassword(password, userName);
         this.id = UUID.randomUUID().toString();
-        this.userName= userName;
-        this.password= password;
-        this.email= email;
-        this.theme= Theme.LIGHT;
+        this.userName = userName;
+        this.password = password;
+        this.email = email;
+        this.theme = Theme.LIGHT;
         sharePermission= true;
-        doesExist= true;
-        likedSongs= new HashSet<>();
-        playlists= new HashSet<>();
-        allSongs= new HashSet<>();
+        doesExist = true;
+        likedSongs = new HashSet<>();
+        playlists = new HashSet<>();
+        allSongs = new HashSet<>();
         downloadedSongs= new HashMap<>();
     }
     public  void validPassword(String password, String userName) throws InvalidPasswordException {
