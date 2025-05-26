@@ -1,7 +1,8 @@
-package backend;
+package backend.model;
 
-import backend.Theme;
-import java.time.LocalDateTime;
+import backend.exceptions.InvalidPasswordException;
+import backend.exceptions.InvalidUsernameException;
+
 import java.util.*;
 import java.time.LocalTime;
 

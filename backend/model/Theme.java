@@ -1,4 +1,4 @@
-package backend;
+package backend.model;
 
 enum Theme {
     DARK,

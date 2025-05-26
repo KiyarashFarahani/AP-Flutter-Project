@@ -1,4 +1,7 @@
-package backend;
+package backend.model;
+
+import backend.exceptions.InvalidPasswordException;
+import backend.exceptions.InvalidUsernameException;
 
 public class Admin extends User {
 

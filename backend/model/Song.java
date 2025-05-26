@@ -1,4 +1,6 @@
-package backend;
+package backend.model;
+import backend.exceptions.UserNullException;
+
 import java.util.*;
 
 public class Song {

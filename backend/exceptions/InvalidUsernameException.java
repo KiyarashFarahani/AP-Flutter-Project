@@ -1,4 +1,4 @@
-package backend;
+package backend.exceptions;
 
 public class InvalidUsernameException extends Exception{
     public InvalidUsernameException(String message){
