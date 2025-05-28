@@ -1,6 +1,6 @@
 package backend.model;
 
-enum Theme {
+public enum Theme {
     DARK,
     LIGHT
 }
