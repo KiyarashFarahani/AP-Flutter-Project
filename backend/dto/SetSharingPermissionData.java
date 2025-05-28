@@ -3,7 +3,7 @@ package backend.dto;
 public class SetSharingPermissionData {
     private boolean sharePermission;
 
-    public boolean isSharePermission() {
+    public boolean getSharePermission() {
         return sharePermission;
     }
 

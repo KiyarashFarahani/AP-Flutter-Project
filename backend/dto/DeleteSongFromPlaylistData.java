@@ -1,8 +1,7 @@
 package backend.dto;
 
-public class DeleteSongFromPlaylistData {
+public class DeleteSongFromPlaylistData extends SongActionData {
     private String playListId;
-    private String songId;
 
     public String getPlayListId() {
         return playListId;
@@ -10,13 +9,5 @@ public class DeleteSongFromPlaylistData {
 
     public void setPlayListId(String playListId) {
         this.playListId = playListId;
-    }
-
-    public String getSongId() {
-        return songId;
-    }
-
-    public void setSongId(String songId) {
-        this.songId = songId;
     }
 }

@@ -1,8 +1,7 @@
 package backend.dto;
 
-public class ShareSongData {
+public class ShareSongData extends SongActionData {
     private String recipientUsername;
-    private String songId;
 
     public String getRecipientUsername() {
         return recipientUsername;
@@ -10,13 +9,5 @@ public class ShareSongData {
 
     public void setRecipientUsername(String recipientUsername) {
         this.recipientUsername = recipientUsername;
-    }
-
-    public String getSongId() {
-        return songId;
-    }
-
-    public void setSongId(String songId) {
-        this.songId = songId;
     }
 }
