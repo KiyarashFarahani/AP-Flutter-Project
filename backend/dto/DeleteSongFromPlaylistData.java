@@ -1,6 +1,6 @@
 package backend.dto;
 
-public class DeleteSongFromPlaylist {
+public class DeleteSongFromPlaylistData {
     private String playListId;
     private String songId;
 

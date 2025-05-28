@@ -1,6 +1,6 @@
 package backend.dto;
 
-public class AddSongToPlaylist {
+public class AddSongToPlaylistData {
     private String songId;
 
     public String getSongId() {
