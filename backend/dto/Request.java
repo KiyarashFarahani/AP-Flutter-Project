@@ -13,6 +13,11 @@ public class Request<T> {
         this.data = data;
     }
 
+    public Request(String action, T data) {
+        this.action = action;
+        this.data = data;
+    }
+
     public String getAction() {
         return action;
     }
