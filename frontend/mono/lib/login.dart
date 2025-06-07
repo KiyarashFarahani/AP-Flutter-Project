@@ -179,12 +179,29 @@ class _LoginState extends State<Login> {
                       style: const TextStyle(color: Colors.white),
                       obscureText: true,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if(value == null || value.isEmpty) {
                           return 'Please enter your password';
                         }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters long';
+                        if (value.length < 8) {
+                          return 'Password must be at least 8 characters long';
                         }
+
+                        if (!RegExp(r'[a-z]').hasMatch(value)) {
+                          return 'Password must contain at least one lowercase letter';
+                        }
+
+                        if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                          return 'Password must contain at least one uppercase letter';
+                        }
+
+                        if (!RegExp(r'\d').hasMatch(value)) {
+                          return 'Password must contain at least one number';
+                        }
+
+                        if (_emailController.text.isNotEmpty && value.toLowerCase().contains(_emailController.text.toLowerCase())) {
+                          return 'Password should not contain the username';
+                        }
+
                         return null;
                       },
                     ),
