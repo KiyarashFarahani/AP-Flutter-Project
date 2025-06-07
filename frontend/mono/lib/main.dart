@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mono/login.dart';
+import 'package:mono/theme.dart';
+import 'package:mono/util.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,13 +12,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = View.of(context).platformDispatcher.platformBrightness;
+    TextTheme textTheme = createTextTheme(context, "Roboto", "Space Mono");
+
+    MaterialTheme theme = MaterialTheme(textTheme);
+
     return MaterialApp(
       title: 'Mono',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black12),
-      ),
+      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: const Login(),
     );
+
   }
 }
 
