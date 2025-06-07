@@ -110,9 +110,9 @@ class _LoginState extends State<Login> {
                     TextFormField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        labelText: 'Email',
+                        labelText: 'Email or Phone Number',
                         prefixIcon: Icon(
-                          Icons.email_rounded,
+                          Icons.person,
                           color: colorScheme.primary,
                         ),
                         border: OutlineInputBorder(
@@ -138,12 +138,15 @@ class _LoginState extends State<Login> {
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
+                          return 'Enter your email or phone number';
                         }
-                        if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                          return 'Please enter a valid email address';
+                        final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+                        final phoneRegex = RegExp(r'^\+?\d{10,15}$');
+
+                        if (emailRegex.hasMatch(value) || phoneRegex.hasMatch(value)) {
+                          return null;
                         }
-                        return null;
+                        return 'Enter a valid email or phone number';
                       },
                     ),
                     const SizedBox(height: 16),
