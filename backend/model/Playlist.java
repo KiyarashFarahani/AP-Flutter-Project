@@ -2,7 +2,7 @@ package backend.model;
 import java.util.*;
 
 public class Playlist {
-    private String id;
+    private int id;
     private String name;
     private Set<Song> songs;
     private User owner;
@@ -10,7 +10,6 @@ public class Playlist {
     private Date updatedAt;
 
     public Playlist(String name, User owner) {
-        this.id = UUID.randomUUID().toString();
         this.name = name;
         this.songs = new HashSet<>();
         this.createdAt = new Date();
@@ -55,7 +54,11 @@ public class Playlist {
         return owner;
     }
 
-    public String getId(){  return id;}
+    public int getId(){  return id;}
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     @Override
     public boolean equals(Object o) {
