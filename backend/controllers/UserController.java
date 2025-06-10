@@ -1,4 +1,4 @@
-package backend.controller;
+package backend.controllers;
 
 public class UserController {
     
