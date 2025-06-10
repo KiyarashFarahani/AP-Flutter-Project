@@ -352,7 +352,7 @@ Allows a user to enable or disable the permission for other users to share songs
   "action": "set_sharing_permission",
   "token": "abc.def.ghi",
   "data": {
-    "sharePermission": true 
+    "sharePermission": true // or false
   }
 }
 ```
@@ -426,7 +426,7 @@ Also updates the global like count of the song.
 ```json
 {
   "status": "error",
-  "message": "Song not found" 
+  "message": "Song not found" // or "Invalid token or unauthorized"
 }
 ```
 
@@ -441,7 +441,7 @@ This action allows the user to set their preferred UI theme — either dark mode
   "action": "set_mode",
   "token": "abc.def.ghi",
   "data": {
-     "theme": "dark"   
+     "theme": "dark"   // or "light"
   }
 }
 ```
@@ -574,3 +574,6 @@ Allows a user to create a new playlist by providing a playlist name. The server 
   "message": "You already have a playlist with this name"
 }
 ```
+
+
+
