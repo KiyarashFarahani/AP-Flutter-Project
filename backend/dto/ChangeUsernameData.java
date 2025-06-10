@@ -3,6 +3,12 @@ package backend.dto;
 public class ChangeUsernameData {
     private String newUsername;
 
+    public ChangeUsernameData() {}
+
+    public ChangeUsernameData(String newUsername) {
+        this.newUsername = newUsername;
+    }
+
     public String getNewUsername() {
         return newUsername;
     }

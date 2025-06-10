@@ -4,6 +4,13 @@ public class LogInData {
     private String username;
     private String password;
 
+    public LogInData() {}
+
+    public LogInData(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
     public String getPassword() {
         return password;
     }

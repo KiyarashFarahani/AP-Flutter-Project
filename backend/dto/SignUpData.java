@@ -3,7 +3,15 @@ package backend.dto;
 public class SignUpData {
     private String username;
     private String password;
-    private String confirm_password;
+    private String confirmPassword;
+
+    public SignUpData() {}
+
+    public SignUpData(String username, String password, String confirmPassword) {
+        this.username = username;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
+    }
 
     public void setUsername(String username) {
         this.username = username;
@@ -14,7 +22,7 @@ public class SignUpData {
     }
 
     public void setConfirm_password(String confirm_password) {
-        this.confirm_password = confirm_password;
+        this.confirmPassword = confirm_password;
     }
 
     public String getUsername() {
@@ -26,7 +34,7 @@ public class SignUpData {
     }
 
     public String getConfirm_password() {
-        return confirm_password;
+        return confirmPassword;
     }
 
 

@@ -5,6 +5,14 @@ public class ChangePasswordData {
     private String newPassword;
     private String confirmNewPassword;
 
+    public ChangePasswordData() {}
+
+    public ChangePasswordData(String oldPassword, String newPassword, String confirmNewPassword) {
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
+        this.confirmNewPassword = confirmNewPassword;
+    }
+
     public String getOldPassword() {
         return oldPassword;
     }

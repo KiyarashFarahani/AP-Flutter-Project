@@ -3,6 +3,12 @@ package backend.dto;
 public class CreateNewPlaylistData {
     private String playListName;
 
+    public CreateNewPlaylistData() {}
+
+    public CreateNewPlaylistData(String playListName) {
+        this.playListName = playListName;
+    }
+
     public String getPlayListName() {
         return playListName;
     }

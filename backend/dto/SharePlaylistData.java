@@ -4,6 +4,13 @@ public class SharePlaylistData {
     private String recipientUsername;
     private String playListId;
 
+    public SharePlaylistData() {}
+
+    public SharePlaylistData(String recipientUsername, String playListId) {
+        this.recipientUsername = recipientUsername;
+        this.playListId = playListId;
+    }
+
     public String getRecipientUsername() {
         return recipientUsername;
     }
