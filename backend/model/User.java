@@ -21,6 +21,7 @@ public class User {
     private Set<Playlist> playlists;
     private Set<Song> allSongs;
     private Map<Song, LocalTime> downloadedSongs;
+    public User(){}
     public User(String userName, String password, String email) throws InvalidPasswordException, InvalidUsernameException {
         validUsername(userName);
         validPassword(password, userName);

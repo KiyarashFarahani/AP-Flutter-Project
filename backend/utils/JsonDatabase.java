@@ -1,4 +1,4 @@
-package backend.database;
+package backend.utils;
 
 import backend.model.*;
 import com.google.gson.Gson;
@@ -10,15 +10,16 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class JsonDatabase {
-    private static final String USERS_FILE= "backend/database/users.json";
-    private static final String SONGS_FILE= "backend/database/songs.json";
-    private static final String PLAYLISTS_FILE= "backend/database/playlists.json";
+    private static final String USERS_FILE= "backend/data/users.json";
+    private static final String SONGS_FILE= "backend/data/songs.json";
+    private static final String PLAYLISTS_FILE= "backend/data/playlists.json";
     private static final Gson gson= new Gson();
+    private static List<User> users= loadUsers();
+    private static List<Song> songs= loadSongs();
+    private static List<Playlist> playlists= loadPlaylists();
 
     public static List<User> loadUsers(){
         try{
@@ -30,18 +31,17 @@ public class JsonDatabase {
             return new ArrayList<>();
         }
     }
-    public static void saveUsers(List<User> users){
+    public static void saveUsers(){
         try(FileWriter writer= new FileWriter(USERS_FILE)){
             gson.toJson(users, writer);
         } catch (IOException e){
             e.printStackTrace();
         }
     }
-    public static void addUser(User user) {
-        List<User> users = loadUsers();
+    public static synchronized void addUser(User user) {
         user.setId(users.size()+1);
         users.add(user);
-        saveUsers(users);
+        saveUsers();
     }
 
     public static User findByUsername(String username) {
@@ -61,7 +61,7 @@ public class JsonDatabase {
             return new ArrayList<>();
         }
     }
-    public static void saveSongs(List<Song> songs){
+    public static void saveSongs(){
         try(FileWriter writer= new FileWriter(SONGS_FILE)){
             gson.toJson(songs, writer);
         } catch (IOException e){
@@ -69,13 +69,12 @@ public class JsonDatabase {
         }
     }
     public static void addSong(Song song) {
-        List<Song> songs = loadSongs();
         song.setId(songs.size()+1);
         songs.add(song);
-        saveSongs(songs);
+        saveSongs();
     }
 
-    public static List<Playlist> loadPlaylist(){
+    public static List<Playlist> loadPlaylists(){
         try{
             String json= Files.readString(Path.of(PLAYLISTS_FILE));
             Type type = new TypeToken<List<Playlist>>(){}.getType();
@@ -85,7 +84,7 @@ public class JsonDatabase {
             return new ArrayList<>();
         }
     }
-    public static void savePlaylists(List<Playlist> playlists){
+    public static void savePlaylists(){
         try(FileWriter writer= new FileWriter(PLAYLISTS_FILE)){
             gson.toJson(playlists, writer);
         } catch (IOException e){
@@ -93,9 +92,8 @@ public class JsonDatabase {
         }
     }
     public static void addPlaylist(Playlist playlist) {
-        List<Playlist> playlists = loadPlaylist();
         playlist.setId(playlists.size()+1);
         playlists.add(playlist);
-        savePlaylists(playlists);
+        savePlaylists();
     }
 }

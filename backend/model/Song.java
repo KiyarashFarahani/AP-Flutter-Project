@@ -27,6 +27,8 @@ public class Song {
 
     private Set<User> likedByUsers;
 
+    public Song(){}
+
     public Song(String id, String title, String artist, String album, String genre, int duration, int year, String filePath, String coverArtUrl, String lyrics, long playCount, int likes, Date createdAt, Date updatedAt, boolean isShareable, Set<User> likedByUsers) {
         this.title = title;
         this.artist = artist;

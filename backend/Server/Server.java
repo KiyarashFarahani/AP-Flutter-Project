@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Server {
     public static void main(String[] args) {
         final int PORT= 1234;
-        AtomicInteger clientCount= new AtomicInteger();
         ExecutorService executor= Executors.newCachedThreadPool();
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -19,7 +18,7 @@ public class Server {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connected: " + socket.getInetAddress());
 
-                executor.submit(new ClientHandler(socket, clientCount.incrementAndGet()));
+                executor.submit(new ClientHandler(socket));
 
             }
         } catch (Exception e) {

@@ -9,6 +9,8 @@ public class Playlist {
     private Date createdAt;
     private Date updatedAt;
 
+    public Playlist(){}
+
     public Playlist(String name, User owner) {
         this.name = name;
         this.songs = new HashSet<>();
