@@ -1,23 +1,23 @@
 package backend.dto;
 
 public class Response<T> {
-    private String status;
+    private int status;
     private T data;
     private String message;
 
     public Response() {}
 
-    public Response(String status, T data, String message) {
+    public Response(int status, T data, String message) {
         this.status = status;
         this.data = data;
         this.message = message;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
