@@ -21,7 +21,9 @@ public class User {
     private Set<Playlist> playlists;
     private Set<Song> allSongs;
     private Map<Song, LocalTime> downloadedSongs;
-    public User(){}
+
+    public User() {}
+
     public User(String userName, String password) throws InvalidPasswordException, InvalidUsernameException {
         validUsername(userName);
         validPassword(password, userName);
@@ -49,69 +51,91 @@ public class User {
         if(password.contains(userName))
             throw new InvalidPasswordException("Your password must not contain your username.");
         else
-            validPassword= true;
+            validPassword = true;
     }
+
     public void validUsername(String userName) throws InvalidUsernameException {
-        if(userName== null || userName.trim().isEmpty())
+        if(userName == null || userName.trim().isEmpty()) {
             throw new InvalidUsernameException("Username is required. Please enter your email or phone number.");
+        }
         if(!userName.matches("^[\\w._%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$") &&
-                !userName.matches("^\\+?[0-9]{10,15}$"))
+                !userName.matches("^\\+?[0-9]{10,15}$")) {
             throw new InvalidUsernameException("Username must be a valid email address or phone number.");
-        else
+        }
+        else {
             validUsername= true;
-    }
-    public void addSong(Song song){
-        allSongs.add(song);
-    }
-    public void downloadSong(Song song){
-        downloadedSongs.put(song, LocalTime.now());
-    }
-    public void setProfilePicture(){}
-    public void toggleLike(Song song){
-        if(likedSongs.contains(song))
-            likedSongs.remove(song);
-        else
-            likedSongs.add(song);
-    }
-    public void setTheme(Theme theme){
-        this.theme= theme;
-    }
-    public boolean addPlaylist(String name){
-       return playlists.add(new Playlist(name, this));
-    }
-    public void removePlaylist(String name){
-        for(Playlist p: playlists){
-            if(p.getName().equals(name)){
-                playlists.remove(p);
-                break;}
         }
     }
-    public boolean hasLikedSong(Song song){
-        if(likedSongs.contains(song))
-            return  true;
+
+    public void addSong(Song song) {
+        allSongs.add(song);
+    }
+
+    public void downloadSong(Song song) {
+        downloadedSongs.put(song, LocalTime.now());
+    }
+
+    public void setProfilePicture() {}
+
+    public void toggleLike(Song song) {
+        if(likedSongs.contains(song)) {
+            likedSongs.remove(song);
+        } else {
+            likedSongs.add(song);
+        }
+    }
+
+    public void setTheme(Theme theme) {
+        this.theme= theme;
+    }
+
+    public boolean addPlaylist(String name) {
+       return playlists.add(new Playlist(name, this));
+    }
+
+    public void removePlaylist(String name) {
+        for(Playlist p: playlists) {
+            if(p.getName().equals(name)) {
+                playlists.remove(p);
+                break;
+            }
+        }
+    }
+
+    public boolean hasLikedSong(Song song) {
+        if(likedSongs.contains(song)) {
+            return true;
+        }
         return false;
     }
-    public void shareSong(Song song){
+
+    public void shareSong(Song song) {
     //TODO: ???
     }
-    public Playlist getPlaylist(String name){
-        for(Playlist p: playlists){
-            if(p.getName().equals(name)){
+
+    public Playlist getPlaylist(String name) {
+        for(Playlist p: playlists) {
+            if(p.getName().equals(name)) {
                 return p;
             }
         }
         return null;
     }
-    public void disableSharePermission(){
+
+    public void disableSharePermission() {
         sharePermission = false;
     }
-    public void enableSharePermission(){
+
+    public void enableSharePermission() {
         sharePermission = true;
     }
-    public void deleteAccount(String userName, String password){
-        if(userName.equals(this.userName)&& password.equals(this.password))
-            doesExist= false;
+
+    public void deleteAccount(String userName, String password) {
+        if(userName.equals(this.userName)&& password.equals(this.password)) {
+            doesExist = false;
+        }
     }
+
     public Set<Playlist> getPlaylists() {
         return playlists;
     }
