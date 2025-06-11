@@ -7,7 +7,7 @@ import java.util.*;
 import java.time.LocalTime;
 
 public class User {
-    private String id;
+    private int id;
     private String userName;
     private String password;
     private String email;
@@ -21,10 +21,10 @@ public class User {
     private Set<Playlist> playlists;
     private Set<Song> allSongs;
     private Map<Song, LocalTime> downloadedSongs;
+    public User(){}
     public User(String userName, String password, String email) throws InvalidPasswordException, InvalidUsernameException {
         validUsername(userName);
         validPassword(password, userName);
-        this.id = UUID.randomUUID().toString();
         this.userName = userName;
         this.password = password;
         this.email = email;
@@ -133,9 +133,11 @@ public class User {
         return userName;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-
+    public void setId(int id) {
+        this.id = id;
+    }
 }

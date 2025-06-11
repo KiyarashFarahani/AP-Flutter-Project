@@ -1,25 +1,31 @@
-package backend.Server;
-
-import java.io.IOException;
+package backend.Server;// Server.java
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
-    private final static int PORT= 1234;
-    private static int clientCount;
-    public static void main(String[] args){
-        try(ServerSocket serverSocket= new ServerSocket(PORT);){
+    public static void main(String[] args) {
+        final int PORT= 1234;
+        ExecutorService executor= Executors.newCachedThreadPool();
 
-            while (!serverSocket.isClosed()){
-                Socket socket= serverSocket.accept();
-                clientCount++;
-                ClientHandler clientHandler= new ClientHandler(socket, clientCount);
-                new Thread(clientHandler).start();
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Server started on port " + PORT);
 
+            while (!serverSocket.isClosed()) {
+                Socket socket = serverSocket.accept();
+                System.out.println("New client connected: " + socket.getInetAddress());
+
+                executor.submit(new ClientHandler(socket));
 
             }
-        } catch (IOException e){
+        } catch (Exception e) {
             e.printStackTrace();
+        }
+        finally {
+            executor.shutdown();
         }
     }
 }

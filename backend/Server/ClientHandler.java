@@ -8,7 +8,7 @@ import java.net.Socket;
 public class ClientHandler implements Runnable {
     private Socket socket;
     private int clientId;
-    public  ClientHandler(Socket socket, int clientId){
+    public  ClientHandler(Socket socket){
         this.socket= socket;
         this.clientId= clientId;
     }

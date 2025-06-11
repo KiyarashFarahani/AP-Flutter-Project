@@ -4,7 +4,7 @@ import backend.exceptions.UserNullException;
 import java.util.*;
 
 public class Song {
-    private String id;
+    private int id;
     private String title;
     private String artist;
     private String album;
@@ -27,8 +27,9 @@ public class Song {
 
     private Set<User> likedByUsers;
 
+    public Song(){}
+
     public Song(String id, String title, String artist, String album, String genre, int duration, int year, String filePath, String coverArtUrl, String lyrics, long playCount, int likes, Date createdAt, Date updatedAt, boolean isShareable, Set<User> likedByUsers) {
-        this.id = UUID.randomUUID().toString();
         this.title = title;
         this.artist = artist;
         this.album = album;
@@ -62,7 +63,7 @@ public class Song {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Song song = (Song) o;
-        return this.id.equals(((Song) o).id);
+        return id == song.id && duration == song.duration && year == song.year && playCount == song.playCount && likes == song.likes && isShareable == song.isShareable && Objects.equals(title, song.title) && Objects.equals(artist, song.artist) && Objects.equals(album, song.album) && Objects.equals(genre, song.genre) && Objects.equals(filePath, song.filePath) && Objects.equals(coverArtUrl, song.coverArtUrl) && Objects.equals(lyrics, song.lyrics) && Objects.equals(createdAt, song.createdAt) && Objects.equals(updatedAt, song.updatedAt) && Objects.equals(likedByUsers, song.likedByUsers);
     }
 
     @Override
@@ -126,7 +127,7 @@ public class Song {
         return isShareable;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
@@ -134,7 +135,7 @@ public class Song {
         return likedByUsers;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
