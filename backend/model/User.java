@@ -22,12 +22,11 @@ public class User {
     private Set<Song> allSongs;
     private Map<Song, LocalTime> downloadedSongs;
     public User(){}
-    public User(String userName, String password, String email) throws InvalidPasswordException, InvalidUsernameException {
+    public User(String userName, String password) throws InvalidPasswordException, InvalidUsernameException {
         validUsername(userName);
         validPassword(password, userName);
         this.userName = userName;
         this.password = password;
-        this.email = email;
         this.theme = Theme.LIGHT;
         sharePermission= true;
         doesExist = true;
