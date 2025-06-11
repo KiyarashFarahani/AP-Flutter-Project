@@ -4,9 +4,14 @@ public class Response<T> {
     private String status;
     private T data;
     private String message;
-    private int httpCode;
 
     public Response() {}
+
+    public Response(String status, T data, String message) {
+        this.status = status;
+        this.data = data;
+        this.message = message;
+    }
 
     public String getStatus() {
         return status;
@@ -30,13 +35,5 @@ public class Response<T> {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public int getHttpCode() {
-        return httpCode;
-    }
-
-    public void setHttpCode(int httpCode) {
-        this.httpCode = httpCode;
     }
 }
