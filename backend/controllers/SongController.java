@@ -57,7 +57,7 @@ public class SongController {
         return new Response<>(200, responseData, liked ? "Song unliked" : "Song liked");
     }
 
-    public Response<Map> addSongsToPlaylist(String token, int playlistId, List<String> songIds) {
+    public Response<Map> addSongsToPlaylist(String token, int playlistId, Set<String> songIds) {
         User user = TokenManager.getUserByToken(token);
         if (user == null)
             return new Response<>(401, null, "Invalid token");

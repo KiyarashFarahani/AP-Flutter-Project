@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
     public static void main(String[] args) {
-        final int PORT= 1234;
-        ExecutorService executor= Executors.newCachedThreadPool();
+        final int PORT = 1234;
+        ExecutorService executor = Executors.newCachedThreadPool();
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Server started on port " + PORT);
