@@ -5,7 +5,7 @@ import backend.model.User;
 import backend.utils.JsonDatabase;
 import backend.utils.TokenManager;
 
-import java.util.Objects;
+import java.util.*;
 
 public class UserController {
 
@@ -13,20 +13,20 @@ public class UserController {
         if (!Objects.equals(password, confirmPassword)) {
             return new Response<>(400, null, "Passwords do not match");
         }
-
         if (JsonDatabase.findByUsername(username) != null) {
             return new Response<>(409, null, "Username already exists");
         }
-
         User user = new User();
         user.setUserName(username);
         user.setPassword(password);
         user.enableSharePermission();
         JsonDatabase.addUser(user);
-
         String token = TokenManager.generateToken(user.getId());
+        Map<String,Object> data = new HashMap<>();
+        data.put("user_id",user.getId());
+        data.put("token",token);
 
-        return new Response<>(200, new ResponseData(user.getId(), token), "Account created successfully");
+        return new Response<>(200, data, "Account created successfully");
     }
 
     public Response<?> login(String username, String password) {
@@ -35,7 +35,10 @@ public class UserController {
             return new Response<>(401, null, "Invalid username or password");
         }
         String token = TokenManager.generateToken(user.getId());
-        return new Response<>(200, new ResponseData(user.getId(), token), "Logged in successfully");
+        Map<String,Object> data = new HashMap<>();
+        data.put("user_id",user.getId());
+        data.put("token",token);
+        return new Response<>(200, data, "Logged in successfully");
     }
 
     public Response<?> changePassword(String token, String oldPassword, String newPassword, String confirmNewPassword) {
