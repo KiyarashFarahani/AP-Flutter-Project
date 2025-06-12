@@ -9,7 +9,7 @@ public class Playlist {
     private Date createdAt;
     private Date updatedAt;
 
-    public Playlist(){}
+    public Playlist() {}
 
     public Playlist(String name, User owner) {
         this.name = name;
@@ -48,8 +48,25 @@ public class Playlist {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Set<Song> getSongs() {
         return songs;
+    }
+
+    public void setSongs(Set<Song> songs) {
+        this.songs = songs;
+    }
+
+    public Set<Integer> getSongIds() {
+        Set<Song> songs = getSongs();
+        Set<Integer> songIds = HashSet.newHashSet(songs.size());
+        for(Song song : songs) {
+            songIds.add(song.getId());
+        }
+        return songIds;
     }
 
     public User getOwner() {
@@ -58,6 +75,10 @@ public class Playlist {
 
     public int getOwnerId() {
         return owner.getId();
+    }
+
+    public void setOwnerId(int id) {
+        owner.setId(id);
     }
 
     public int getId(){  return id;}

@@ -38,7 +38,7 @@ public class User {
         downloadedSongs= new HashMap<>();
     }
     public  void validPassword(String password, String userName) throws InvalidPasswordException {
-        if(password== null || password.trim().isEmpty())
+        if(password == null || password.trim().isEmpty())
             throw new InvalidPasswordException("Password is required. Please enter your password to continue.");
         if(password.length()<8)
             throw new InvalidPasswordException("Your password must be at least 8 characters long.");
@@ -138,6 +138,10 @@ public class User {
 
     public Set<Playlist> getPlaylists() {
         return playlists;
+    }
+
+    public Set<Song> getSongs() {
+        return allSongs;
     }
 
     public Set<Song> getLikedSongs() {
