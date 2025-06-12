@@ -1,8 +1,11 @@
 package backend.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class SignUpData {
     private String username;
     private String password;
+    @SerializedName("confirm_password")
     private String confirmPassword;
 
     public SignUpData() {}

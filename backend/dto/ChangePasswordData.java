@@ -1,8 +1,13 @@
 package backend.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class ChangePasswordData {
+    @SerializedName("old_password")
     private String oldPassword;
+    @SerializedName("new_password")
     private String newPassword;
+    @SerializedName("confirm_new_password")
     private String confirmNewPassword;
 
     public ChangePasswordData() {}

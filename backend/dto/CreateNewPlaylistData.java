@@ -1,6 +1,9 @@
 package backend.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class CreateNewPlaylistData {
+    @SerializedName("name")
     private String playListName;
 
     public CreateNewPlaylistData() {}

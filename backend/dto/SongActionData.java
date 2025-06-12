@@ -1,6 +1,9 @@
 package backend.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class SongActionData {
+    @SerializedName("song_id")
     private String songId;
 
     public SongActionData() {}

@@ -1,6 +1,9 @@
 package backend.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class DeleteSongFromPlaylistData extends SongActionData {
+    @SerializedName("playlist_id")
     private String playListId;
 
     public DeleteSongFromPlaylistData() {

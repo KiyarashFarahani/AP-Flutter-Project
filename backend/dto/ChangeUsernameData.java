@@ -1,6 +1,9 @@
 package backend.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class ChangeUsernameData {
+    @SerializedName("new_username")
     private String newUsername;
 
     public ChangeUsernameData() {}

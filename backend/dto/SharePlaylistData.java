@@ -1,7 +1,11 @@
 package backend.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class SharePlaylistData {
+    @SerializedName("recipient_username")
     private String recipientUsername;
+    @SerializedName("playlist_id")
     private String playListId;
 
     public SharePlaylistData() {}

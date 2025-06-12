@@ -1,6 +1,9 @@
 package backend.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class ShareSongData extends SongActionData {
+    @SerializedName("recipient_username")
     private String recipientUsername;
 
     public ShareSongData() {
