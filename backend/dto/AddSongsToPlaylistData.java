@@ -7,22 +7,22 @@ import java.util.Set;
 
 public class AddSongsToPlaylistData {
     @SerializedName("playlist_id")
-    private String playlistId;
+    private int playlistId;
     @SerializedName("song_ids")
     private Set<String> songIds;
 
     public AddSongsToPlaylistData() {}
 
-    public AddSongsToPlaylistData(String playlistId, Set<String> songIds) {
+    public AddSongsToPlaylistData(int playlistId, Set<String> songIds) {
         this.playlistId = playlistId;
         this.songIds = songIds;
     }
 
-    public String getPlaylistId() {
+    public int getPlaylistId() {
         return playlistId;
     }
 
-    public void setPlaylistId(String playlistId) {
+    public void setPlaylistId(int playlistId) {
         this.playlistId = playlistId;
     }
 

@@ -4,19 +4,19 @@ import com.google.gson.annotations.SerializedName;
 
 public class SongActionData {
     @SerializedName("song_id")
-    private String songId;
+    private int songId;
 
     public SongActionData() {}
 
-    public SongActionData(String songId) {
+    public SongActionData(int songId) {
         this.songId = songId;
     }
 
-    public String getSongId() {
+    public int getSongId() {
         return songId;
     }
 
-    public void setSongId(String songId) {
+    public void setSongId(int songId) {
         this.songId = songId;
     }
 }

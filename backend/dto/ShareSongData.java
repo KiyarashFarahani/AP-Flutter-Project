@@ -10,7 +10,7 @@ public class ShareSongData extends SongActionData {
         super();
     }
 
-    public ShareSongData(String songId, String recipientUsername) {
+    public ShareSongData(int songId, String recipientUsername) {
         super(songId);
         this.recipientUsername = recipientUsername;
     }

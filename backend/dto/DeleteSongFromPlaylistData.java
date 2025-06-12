@@ -4,22 +4,22 @@ import com.google.gson.annotations.SerializedName;
 
 public class DeleteSongFromPlaylistData extends SongActionData {
     @SerializedName("playlist_id")
-    private String playListId;
+    private int playListId;
 
     public DeleteSongFromPlaylistData() {
         super();
     }
 
-    public DeleteSongFromPlaylistData(String songId, String playListId) {
+    public DeleteSongFromPlaylistData(String songId, int playListId) {
         super(songId);
         this.playListId = playListId;
     }
 
-    public String getPlayListId() {
+    public int getPlayListId() {
         return playListId;
     }
 
-    public void setPlayListId(String playListId) {
+    public void setPlayListId(int playListId) {
         this.playListId = playListId;
     }
 }
