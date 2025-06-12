@@ -97,11 +97,7 @@ public class UserController {
             return new Response<>(401, null, "Invalid token");
         }
         User user = JsonDatabase.findUserById(userId);
-        if(sharePermission) {
-            user.enableSharePermission();
-        } else {
-            user.disableSharePermission();
-        }
+        user.setSharePermission(sharePermission);
         JsonDatabase.saveUsers();
         return new Response<>(200, null, "Sharing permission updated successfully");
     }
