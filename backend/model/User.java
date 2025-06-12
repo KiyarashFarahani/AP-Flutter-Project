@@ -168,6 +168,14 @@ public class User {
         this.userName = userName;
     }
 
+    public boolean isSharePermission() {
+        return sharePermission;
+    }
+
+    public void setSharePermission(boolean sharePermission) {
+        this.sharePermission = sharePermission;
+    }
+
     public int getId() {
         return id;
     }
