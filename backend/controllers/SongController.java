@@ -114,9 +114,7 @@ public class SongController {
             }
         }
 
-        Playlist playlist = new Playlist();
-        playlist.setName(name);
-        playlist.setOwnerId(user.getId());
+        Playlist playlist = new Playlist(name,user);
         playlist.setSongs(new HashSet<>());
 
         JsonDatabase.addPlaylist(playlist);
