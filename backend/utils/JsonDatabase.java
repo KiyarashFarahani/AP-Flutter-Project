@@ -1,5 +1,8 @@
 package backend.utils;
 
+import backend.exceptions.PlaylistIdNotFoundException;
+import backend.exceptions.SongIdNotFoundException;
+import backend.exceptions.UserIdNotFoundException;
 import backend.model.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -16,26 +19,26 @@ public class JsonDatabase {
     private static final String USERS_FILE = "backend/data/users.json";
     private static final String SONGS_FILE = "backend/data/songs.json";
     private static final String PLAYLISTS_FILE = "backend/data/playlists.json";
-    private static final Gson gson= new Gson();
-    private static List<User> users= loadUsers();
-    private static List<Song> songs= loadSongs();
-    private static List<Playlist> playlists= loadPlaylists();
+    private static final Gson gson = new Gson();
+    private static List<User> users = loadUsers();
+    private static List<Song> songs = loadSongs();
+    private static List<Playlist> playlists = loadPlaylists();
 
     public static List<User> loadUsers() {
-        try{
+        try {
             String json= Files.readString(Path.of(USERS_FILE));
             Type type = new TypeToken<List<User>>(){}.getType();
             return gson.fromJson(json, type);
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
 
     public static void saveUsers() {
-        try(FileWriter writer= new FileWriter(USERS_FILE)){
+        try(FileWriter writer = new FileWriter(USERS_FILE)){
             gson.toJson(users, writer);
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -53,21 +56,30 @@ public class JsonDatabase {
         return null;
     }
 
+    public static User findUserById(int Id) throws UserIdNotFoundException {
+        for(User user : users) {
+            if(user.getId()==Id) {
+                return user;
+            }
+        }
+        throw new UserIdNotFoundException("User ID not found!");
+    }
+
     public static List<Song> loadSongs() {
-        try{
-            String json= Files.readString(Path.of(SONGS_FILE));
+        try {
+            String json = Files.readString(Path.of(SONGS_FILE));
             Type type = new TypeToken<List<Song>>(){}.getType();
             return gson.fromJson(json, type);
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
 
-    public static void saveSongs(){
+    public static void saveSongs() {
         try(FileWriter writer= new FileWriter(SONGS_FILE)){
             gson.toJson(songs, writer);
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -78,12 +90,30 @@ public class JsonDatabase {
         saveSongs();
     }
 
+    public static Song getSongById(int songId) throws SongIdNotFoundException {
+        for(Song song : songs) {
+            if(song.getId()==songId) {
+                return song;
+            }
+        }
+        throw new SongIdNotFoundException("Song ID not found!");
+    }
+
+    public static Playlist getPlaylistById(int playlistId) throws PlaylistIdNotFoundException {
+        for(Playlist playlist : playlists) {
+            if(playlist.getId()==playlistId) {
+                return playlist;
+            }
+        }
+        throw new PlaylistIdNotFoundException("Playlist ID not found!");
+    }
+
     public static List<Playlist> loadPlaylists(){
         try {
             String json= Files.readString(Path.of(PLAYLISTS_FILE));
             Type type = new TypeToken<List<Playlist>>(){}.getType();
             return gson.fromJson(json, type);
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
@@ -92,7 +122,7 @@ public class JsonDatabase {
     public static void savePlaylists(){
         try(FileWriter writer= new FileWriter(PLAYLISTS_FILE)) {
             gson.toJson(playlists, writer);
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

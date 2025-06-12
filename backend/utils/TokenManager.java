@@ -1,5 +1,7 @@
 package backend.utils;
 
+import backend.model.User;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -12,6 +14,10 @@ public class TokenManager {
         String token = UUID.randomUUID().toString();
         tokenStore.put(token, userId);
         return token;
+    }
+
+    public static User getUserByToken(String token) {
+        return JsonDatabase.findUserById(tokenStore.get(token));
     }
 
     public static Integer validateToken(String token) {
