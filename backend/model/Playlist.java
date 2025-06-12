@@ -56,6 +56,10 @@ public class Playlist {
         return owner;
     }
 
+    public int getOwnerId() {
+        return owner.getId();
+    }
+
     public int getId(){  return id;}
 
     public void setId(int id) {
