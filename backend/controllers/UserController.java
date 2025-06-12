@@ -1,6 +1,7 @@
 package backend.controllers;
 
 import backend.dto.Response;
+import backend.model.Theme;
 import backend.model.User;
 import backend.utils.JsonDatabase;
 import backend.utils.TokenManager;
@@ -103,5 +104,16 @@ public class UserController {
         user.setSharePermission(sharePermission);
         JsonDatabase.saveUsers();
         return new Response<>(200, null, "Sharing permission updated successfully");
+    }
+
+    public Response<?> setDarkLightMode(String token, Theme newTheme) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null) {
+            return new Response<>(401, null, "Invalid token");
+        }
+        User user = JsonDatabase.findUserById(userId);
+        user.setTheme(newTheme);
+        JsonDatabase.saveUsers();
+        return new Response<>(200, null, "Dark/Light Mode updated successfully");
     }
 }
