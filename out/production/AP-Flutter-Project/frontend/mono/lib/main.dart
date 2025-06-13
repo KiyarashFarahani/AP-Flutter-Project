@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mono/login.dart';
-import 'package:mono/socket_client.dart';
 import 'package:mono/theme.dart';
 import 'package:mono/util.dart';
 
-void main() async {
-  final client = SocketClient();
-  await client.connect();
-  client.sendTestMessage();
-
-  // Keep app alive for a few seconds to receive response
-  await Future.delayed(Duration(seconds: 3));
-  exit(0);
+void main() {
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -29,5 +22,7 @@ class MyApp extends StatelessWidget {
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: const Login(),
     );
+
   }
 }
+
