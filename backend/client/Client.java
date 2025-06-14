@@ -1,42 +1,36 @@
 package backend.client;
 
-import backend.exceptions.InvalidPasswordException;
-import backend.exceptions.InvalidUsernameException;
-import backend.model.User;
-import com.google.gson.Gson;
 import java.io.*;
 import java.net.Socket;
 
 public class Client {
     public static void main(String[] args) {
-        String host = "localhost";
-        int port = 1234;
+        String serverHost = "localhost";
+        int serverPort = 1234;
 
-        try (Socket socket = new Socket(host, port)) {
-            // Streams
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        try (Socket socket = new Socket(serverHost, serverPort);
+             BufferedReader fileReader = new BufferedReader(new FileReader("C:\\Users\\MILAD-CO\\Desktop\\Term2\\AP\\APproject\\src\\backend\\client\\data.json"));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+        ) {
 
-            // Create a User object
-            User user = new User("bbbb@gmail.com", "Alice");
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = fileReader.readLine()) != null) {
+                jsonBuilder.append(line);
+            }
 
-            // Convert to JSON
-            Gson gson = new Gson();
-            String json = gson.toJson(user);
+            String jsonToSend = jsonBuilder.toString();
+            System.out.println("Sending JSON to server:\n" + jsonToSend);
 
-            // Send to server
-            out.println(json);
+            out.println(jsonToSend);
 
-            // Read response
             String response = in.readLine();
             System.out.println("Server response: " + response);
 
+
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InvalidPasswordException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidUsernameException e) {
-            throw new RuntimeException(e);
         }
     }
 }

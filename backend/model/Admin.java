@@ -7,7 +7,7 @@ public class Admin extends User {
 
 	public Admin(String userName, String password, String email)
 			throws InvalidPasswordException, InvalidUsernameException {
-		super(userName, password, email);
+		super(userName, password);
 	}
 
 	public void banUser(User user) {

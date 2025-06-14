@@ -5,13 +5,14 @@ import backend.model.Theme;
 import backend.model.User;
 import backend.utils.JsonDatabase;
 import backend.utils.TokenManager;
+import com.google.gson.Gson;
 
 import java.util.*;
 
 public class UserController {
 
     public Response<?> signUp(String username, String password, String confirmPassword) {
-        if (!Objects.equals(password, confirmPassword)) {
+        if (!password.trim().equals(confirmPassword.trim())) {
             return new Response<>(400, null, "Passwords do not match");
         }
         if (JsonDatabase.findByUsername(username) != null) {
@@ -24,9 +25,8 @@ public class UserController {
         JsonDatabase.addUser(user);
         String token = TokenManager.generateToken(user.getId());
         Map<String,Object> data = new HashMap<>();
-        data.put("user_id",user.getId());
+        data.put("user",user.getUserName());
         data.put("token",token);
-
         return new Response<>(200, data, "Account created successfully");
     }
 

@@ -1,0 +1,8 @@
+{
+  "action": "sign_up",
+  "data": {
+    "username": "testuser@gmail.com",
+    "password": "myPassword22",
+    "confirm_password": "myPassword22"
+  }
+}

@@ -10,7 +10,7 @@ public class DeleteSongFromPlaylistData extends SongActionData {
         super();
     }
 
-    public DeleteSongFromPlaylistData(String songId, int playListId) {
+    public DeleteSongFromPlaylistData(int songId, int playListId) {
         super(songId);
         this.playListId = playListId;
     }

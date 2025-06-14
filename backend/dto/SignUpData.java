@@ -3,10 +3,12 @@ package backend.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class SignUpData {
+    @SerializedName("username")
     private String username;
+    @SerializedName("password")
     private String password;
     @SerializedName("confirm_password")
-    private String confirmPassword;
+    private String confirmPassword;;
 
     public SignUpData() {}
 

@@ -1,8 +1,6 @@
 package backend.utils;
 
-import backend.exceptions.PlaylistIdNotFoundException;
-import backend.exceptions.SongIdNotFoundException;
-import backend.exceptions.UserIdNotFoundException;
+import backend.exceptions.*;
 import backend.model.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
