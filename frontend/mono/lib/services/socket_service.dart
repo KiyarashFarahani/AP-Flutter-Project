@@ -22,7 +22,7 @@ class SocketService {
 
   void sendJson(Map<String, dynamic> jsonData) {
     if (_socket != null) {
-      final json = jsonEncode(jsonData) + "\n";
+      final json = "${jsonEncode(jsonData)}\n";
       _socket!.write(json);
     }
   }

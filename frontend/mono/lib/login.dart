@@ -96,7 +96,6 @@ class _LoginState extends State<Login> {
                       ],
                     ),
 
-
                     const SizedBox(height: 48),
                     Text(
                       'Login to continue',
@@ -106,7 +105,6 @@ class _LoginState extends State<Login> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 18),
-
 
                     TextFormField(
                       controller: _emailController,
@@ -144,14 +142,14 @@ class _LoginState extends State<Login> {
                         final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
                         final phoneRegex = RegExp(r'^\+?\d{10,15}$');
 
-                        if (emailRegex.hasMatch(value) || phoneRegex.hasMatch(value)) {
+                        if (emailRegex.hasMatch(value) ||
+                            phoneRegex.hasMatch(value)) {
                           return null;
                         }
                         return 'Enter a valid email or phone number';
                       },
                     ),
                     const SizedBox(height: 16),
-
 
                     TextFormField(
                       controller: _passwordController,
@@ -183,7 +181,7 @@ class _LoginState extends State<Login> {
                       style: const TextStyle(color: Colors.white),
                       obscureText: true,
                       validator: (value) {
-                        if(value == null || value.isEmpty) {
+                        if (value == null || value.isEmpty) {
                           return 'Please enter your password';
                         }
                         if (value.length < 8) {
@@ -202,7 +200,10 @@ class _LoginState extends State<Login> {
                           return 'Password must contain at least one number';
                         }
 
-                        if (_emailController.text.isNotEmpty && value.toLowerCase().contains(_emailController.text.toLowerCase())) {
+                        if (_emailController.text.isNotEmpty &&
+                            value.toLowerCase().contains(
+                              _emailController.text.toLowerCase(),
+                            )) {
                           return 'Password should not contain the username';
                         }
 
@@ -211,13 +212,10 @@ class _LoginState extends State<Login> {
                     ),
                     const SizedBox(height: 8),
 
-
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-
-                        },
+                        onPressed: () {},
                         child: Text(
                           'Forgot Password?',
                           style: TextStyle(color: colorScheme.primary),
@@ -226,36 +224,36 @@ class _LoginState extends State<Login> {
                     ),
                     const SizedBox(height: 24),
 
-
                     _isLoading
                         ? Center(
-                      child: CircularProgressIndicator(
-                        color: colorScheme.primary,
-                      ),
-                    )
+                          child: CircularProgressIndicator(
+                            color: colorScheme.primary,
+                          ),
+                        )
                         : FilledButton(
-                      onPressed: _login,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0),
+                          onPressed: _login,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            textStyle: textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          child: Text(
+                            'Login',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleSmall?.copyWith(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        textStyle: textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      child: Text(
-                        'Login',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 24),
-
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -268,7 +266,9 @@ class _LoginState extends State<Login> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const SignUp()),
+                              MaterialPageRoute(
+                                builder: (context) => const SignUp(),
+                              ),
                             );
                           },
                           child: Text(

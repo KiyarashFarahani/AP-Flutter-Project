@@ -89,7 +89,9 @@ class _SignUpState extends State<SignUp> {
                         ),
                         Text(
                           'Mono',
-                          style: Theme.of(context).textTheme.displayLarge!.copyWith(fontSize: 80),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.displayLarge!.copyWith(fontSize: 80),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -240,31 +242,33 @@ class _SignUpState extends State<SignUp> {
 
                     _isLoading
                         ? Center(
-                            child: CircularProgressIndicator(
-                              color: colorScheme.primary,
-                            ),
-                          )
+                          child: CircularProgressIndicator(
+                            color: colorScheme.primary,
+                          ),
+                        )
                         : FilledButton(
-                            onPressed: _signUp,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: colorScheme.primary,
-                              foregroundColor: colorScheme.onPrimary,
-                              padding: const EdgeInsets.symmetric(vertical: 16.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16.0),
-                              ),
-                              textStyle: textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          onPressed: _signUp,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
                             ),
-                            child: Text(
-                              'Sign Up',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            textStyle: textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                          child: Text(
+                            'Sign Up',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleSmall?.copyWith(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                     const SizedBox(height: 24),
 
                     Row(
@@ -297,4 +301,4 @@ class _SignUpState extends State<SignUp> {
       ),
     );
   }
-} 
+}
