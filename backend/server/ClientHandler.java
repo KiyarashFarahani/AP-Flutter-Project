@@ -1,9 +1,8 @@
-package backend.Server;
+package backend.server;
 
 import backend.controllers.SongController;
 import backend.controllers.UserController;
 import backend.dto.*;
-import backend.dto.Request.*;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

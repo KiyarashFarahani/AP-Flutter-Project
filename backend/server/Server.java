@@ -1,10 +1,8 @@
-package backend.Server;// Server.java
+package backend.server;// Server.java
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
     public static void main(String[] args) {
