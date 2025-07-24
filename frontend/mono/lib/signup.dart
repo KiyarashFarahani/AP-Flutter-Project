@@ -68,7 +68,7 @@ class _SignUpState extends State<SignUp> {
           ),
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(color: Colors.black.withOpacity(0.2)),
+            child: Container(color: Color.fromRGBO(0, 0, 0, 0.2)),
           ),
 
           Center(
@@ -131,7 +131,7 @@ class _SignUpState extends State<SignUp> {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
+                        fillColor: Color.fromRGBO(255, 255, 255, 0.1),
                         labelStyle: TextStyle(color: Colors.white70),
                       ),
                       style: const TextStyle(color: Colors.white),
@@ -173,7 +173,7 @@ class _SignUpState extends State<SignUp> {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
+                        fillColor: Color.fromRGBO(255, 255, 255, 0.1),
                         labelStyle: TextStyle(color: Colors.white70),
                       ),
                       style: const TextStyle(color: Colors.white),
@@ -223,7 +223,7 @@ class _SignUpState extends State<SignUp> {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
+                        fillColor: Color.fromRGBO(255, 255, 255, 0.1),
                         labelStyle: TextStyle(color: Colors.white70),
                       ),
                       style: const TextStyle(color: Colors.white),
