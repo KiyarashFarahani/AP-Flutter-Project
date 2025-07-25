@@ -12,7 +12,7 @@ class SocketManager {
   SocketManager._internal();
 
   Future<void> connect() async {
-    const String serverIp = '10.0.2.2'; 
+    const String serverIp = '10.0.2.2';
     const int port = 1234;
 
     try {
