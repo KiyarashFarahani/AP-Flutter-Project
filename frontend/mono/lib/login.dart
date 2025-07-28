@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:mono/home.dart';
 import 'package:mono/signup.dart';
 
 class Login extends StatefulWidget {
@@ -41,6 +42,11 @@ class _LoginState extends State<Login> {
           _isLoading = false;
         });
       }
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+        (Route<dynamic> route) => false,
+      );
     }
   }
 
