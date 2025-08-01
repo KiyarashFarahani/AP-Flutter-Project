@@ -24,7 +24,7 @@ public class JsonDatabase {
 
     public static List<User> loadUsers() {
         try {
-            String json= Files.readString(Path.of(USERS_FILE));
+            String json = Files.readString(Path.of(USERS_FILE));
             Type type = new TypeToken<List<User>>(){}.getType();
             return gson.fromJson(json, type);
         } catch (IOException e) {
@@ -75,7 +75,7 @@ public class JsonDatabase {
     }
 
     public static void saveSongs() {
-        try(FileWriter writer= new FileWriter(SONGS_FILE)){
+        try(FileWriter writer = new FileWriter(SONGS_FILE)){
             gson.toJson(songs, writer);
         } catch (IOException e) {
             e.printStackTrace();
@@ -117,7 +117,7 @@ public class JsonDatabase {
         }
     }
 
-    public static void savePlaylists(){
+    public static void savePlaylists() {
         try(FileWriter writer= new FileWriter(PLAYLISTS_FILE)) {
             gson.toJson(playlists, writer);
         } catch (IOException e) {
@@ -134,5 +134,20 @@ public class JsonDatabase {
     public static synchronized void deleteUser(User user) {
         users.removeIf(u -> u.getId() == user.getId());
         saveUsers();
+    }
+
+    public static void clearSongs() {
+        songs.clear();
+        saveSongs();
+    }
+
+    public static void clearUsers() {
+        users.clear();
+        saveUsers();
+    }
+
+    public static void clearPlaylists() {
+        playlists.clear();
+        savePlaylists();
     }
 }
