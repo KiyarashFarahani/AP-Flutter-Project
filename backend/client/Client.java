@@ -9,7 +9,7 @@ public class Client {
         int serverPort = 1234;
 
         try (Socket socket = new Socket(serverHost, serverPort);
-             BufferedReader fileReader = new BufferedReader(new FileReader("backend/client/data.json"));
+             BufferedReader fileReader = new BufferedReader(new FileReader("client/data.json"));
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
         ) {
