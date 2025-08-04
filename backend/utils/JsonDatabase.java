@@ -18,6 +18,8 @@ public class JsonDatabase {
     private static final String USERS_FILE = "data/users.json";
     private static final String SONGS_FILE = "data/songs.json";
     private static final String PLAYLISTS_FILE = "data/playlists.json";
+
+
     static Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalTime.class, new JsonDeserializer<LocalTime>() {
                 @Override
@@ -28,6 +30,7 @@ public class JsonDatabase {
             })
             .setPrettyPrinting()
             .create();
+
     private static List<User> users = loadUsers();
     private static List<Song> songs = loadSongs();
     private static List<Playlist> playlists = loadPlaylists();
