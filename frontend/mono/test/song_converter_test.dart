@@ -39,10 +39,14 @@ void main() {
       expect(json['lyrics'], equals('Lyrics'));
       expect(json['playCount'], equals(100));
       expect(json['likes'], equals(5));
-      expect(json['createdAt'], equals(DateTime.parse("2022-01-01T12:00:00Z")
-          .toIso8601String()));
-      expect(json['updatedAt'], equals(DateTime.parse("2022-02-01T12:00:00Z")
-          .toIso8601String(),));
+      expect(
+        json['createdAt'],
+        equals(DateTime.parse("2022-01-01T12:00:00Z").toIso8601String()),
+      );
+      expect(
+        json['updatedAt'],
+        equals(DateTime.parse("2022-02-01T12:00:00Z").toIso8601String()),
+      );
       expect(json['isShareable'], equals(true));
       expect(json['likedByUsers'], equals([]));
     });
