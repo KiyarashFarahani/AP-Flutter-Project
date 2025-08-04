@@ -28,6 +28,7 @@ public class ClientHandler implements Runnable {
         ) {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
+                System.out.println("Received request: " + inputLine);
                 Request<?> request = gson.fromJson(inputLine, new TypeToken<Request<Object>>(){}.getType());
                 String action = request.getAction();
                 String token = request.getToken();
@@ -107,7 +108,9 @@ public class ClientHandler implements Runnable {
                     }
                 }
 
-                out.println(gson.toJson(response));
+                String responseJson = gson.toJson(response);
+                System.out.println("Sending response: " + responseJson);
+                out.println(responseJson);
             }
         } catch (IOException e) {
             e.printStackTrace();
