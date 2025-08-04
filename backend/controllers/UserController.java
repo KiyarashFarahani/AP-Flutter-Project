@@ -25,8 +25,9 @@ public class UserController {
         JsonDatabase.addUser(user);
         String token = TokenManager.generateToken(user.getId());
         Map<String,Object> data = new HashMap<>();
-        data.put("user",user.getUserName());
-        data.put("token",token);
+        data.put("user_id", user.getId());
+        data.put("token", token);
+        data.put("message", "Account created successfully");
         return new Response<>(200, data, "Account created successfully");
     }
 
@@ -37,8 +38,9 @@ public class UserController {
         }
         String token = TokenManager.generateToken(user.getId());
         Map<String,Object> data = new HashMap<>();
-        data.put("user_id",user.getId());
-        data.put("token",token);
+        data.put("user_id", user.getId());
+        data.put("token", token);
+        data.put("message", "Logged in successfully");
         return new Response<>(200, data, "Logged in successfully");
     }
 
