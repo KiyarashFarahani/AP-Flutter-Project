@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": 1,
+    "userName": "testuser@gmail.com",
+    "password": "myPassword22",
+    "sharePermission": true,
+    "validUsername": true,
+    "validPassword": true,
+    "doesExist": true
+  },
+  {
+    "id": 2,
+    "userName": "testuser@gmail.com",
+    "password": "myPassword22",
+    "sharePermission": true,
+    "validUsername": false,
+    "validPassword": false,
+    "doesExist": false
+  }
+]
