@@ -2,7 +2,7 @@ package backend.utils;
 
 import backend.exceptions.*;
 import backend.model.*;
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.FileWriter;
@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,14 +18,26 @@ public class JsonDatabase {
     private static final String USERS_FILE = "data/users.json";
     private static final String SONGS_FILE = "data/songs.json";
     private static final String PLAYLISTS_FILE = "data/playlists.json";
-    private static final Gson gson = new Gson();
+
+
+    static Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalTime.class, new JsonDeserializer<LocalTime>() {
+                @Override
+                public LocalTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                        throws JsonParseException {
+                    return LocalTime.parse(json.getAsString());
+                }
+            })
+            .setPrettyPrinting()
+            .create();
+
     private static List<User> users = loadUsers();
     private static List<Song> songs = loadSongs();
     private static List<Playlist> playlists = loadPlaylists();
 
     public static List<User> loadUsers() {
         try {
-            String json= Files.readString(Path.of(USERS_FILE));
+            String json = Files.readString(Path.of(USERS_FILE));
             Type type = new TypeToken<List<User>>(){}.getType();
             return gson.fromJson(json, type);
         } catch (IOException e) {
@@ -75,7 +88,7 @@ public class JsonDatabase {
     }
 
     public static void saveSongs() {
-        try(FileWriter writer= new FileWriter(SONGS_FILE)){
+        try(FileWriter writer = new FileWriter(SONGS_FILE)){
             gson.toJson(songs, writer);
         } catch (IOException e) {
             e.printStackTrace();
@@ -117,7 +130,7 @@ public class JsonDatabase {
         }
     }
 
-    public static void savePlaylists(){
+    public static void savePlaylists() {
         try(FileWriter writer= new FileWriter(PLAYLISTS_FILE)) {
             gson.toJson(playlists, writer);
         } catch (IOException e) {
@@ -131,8 +144,33 @@ public class JsonDatabase {
         savePlaylists();
     }
 
+    public static synchronized void deleteAllUsers() {
+        users.clear();
+        saveUsers();
+    }
+
     public static synchronized void deleteUser(User user) {
         users.removeIf(u -> u.getId() == user.getId());
         saveUsers();
+    }
+
+    public static synchronized void deleteAllSongs() {
+        songs.clear();
+        saveSongs();
+    }
+
+    public static synchronized void deleteSong(Song song) {
+        songs.removeIf(s -> s.equals(song));
+        saveSongs();
+    }
+
+    public static synchronized void deleteAllPlaylists() {
+        playlists.clear();
+        savePlaylists();
+    }
+
+    public static synchronized void deletePlaylist(Playlist playlist) {
+        playlists.removeIf(p -> p.equals(playlist));
+        savePlaylists();
     }
 }

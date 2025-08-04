@@ -92,7 +92,7 @@ public class Playlist {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Playlist playlist = (Playlist) o;
-        return Objects.equals(id, playlist.id);
+        return Objects.equals(name,playlist.name) && Objects.equals(owner,playlist.owner);
     }
 
     @Override

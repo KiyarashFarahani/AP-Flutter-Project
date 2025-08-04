@@ -1,4 +1,5 @@
 package backend.model;
+
 import backend.exceptions.UserNullException;
 
 import java.util.*;
@@ -27,7 +28,8 @@ public class Song {
 
     private Set<User> likedByUsers;
 
-    public Song(){}
+    public Song() {
+    }
 
     public Song(String id, String title, String artist, String album, String genre, int duration, int year, String filePath, String coverArtUrl, String lyrics, long playCount, int likes, Date createdAt, Date updatedAt, boolean isShareable, Set<User> likedByUsers) {
         this.title = title;
@@ -63,7 +65,11 @@ public class Song {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Song song = (Song) o;
-        return id == song.id && duration == song.duration && year == song.year && playCount == song.playCount && likes == song.likes && isShareable == song.isShareable && Objects.equals(title, song.title) && Objects.equals(artist, song.artist) && Objects.equals(album, song.album) && Objects.equals(genre, song.genre) && Objects.equals(filePath, song.filePath) && Objects.equals(coverArtUrl, song.coverArtUrl) && Objects.equals(lyrics, song.lyrics) && Objects.equals(createdAt, song.createdAt) && Objects.equals(updatedAt, song.updatedAt) && Objects.equals(likedByUsers, song.likedByUsers);
+        return duration == song.duration && year == song.year && playCount == song.playCount && likes == song.likes
+                && isShareable == song.isShareable && Objects.equals(title, song.title)
+                && Objects.equals(artist, song.artist) && Objects.equals(album, song.album)
+                && Objects.equals(genre, song.genre) && Objects.equals(filePath, song.filePath)
+                && Objects.equals(coverArtUrl, song.coverArtUrl) && Objects.equals(lyrics, song.lyrics);
     }
 
     @Override

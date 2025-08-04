@@ -30,13 +30,14 @@ public class User {
         this.userName = userName;
         this.password = password;
         this.theme = Theme.LIGHT;
-        sharePermission= true;
+        sharePermission = true;
         doesExist = true;
         likedSongs = new HashSet<>();
         playlists = new HashSet<>();
         allSongs = new HashSet<>();
         downloadedSongs= new HashMap<>();
     }
+
     public  void validPassword(String password, String userName) throws InvalidPasswordException {
         if(password == null || password.trim().isEmpty())
             throw new InvalidPasswordException("Password is required. Please enter your password to continue.");
@@ -65,6 +66,18 @@ public class User {
         else {
             validUsername= true;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(userName, user.userName) && Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userName, email);
     }
 
     public void addSong(Song song) {
