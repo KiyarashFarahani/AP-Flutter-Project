@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mono/models/playlist.dart';
 
 class NewPlaylist extends StatefulWidget {
-  NewPlaylist(this.addPlaylist, {super.key});
+  NewPlaylist(this.addPlaylist, {required this.playlists, super.key});
   void Function(Playlist playlist) addPlaylist;
+  List<Playlist> playlists;
   @override
   State<StatefulWidget> createState() {
     return _NewPlaylistState();
@@ -12,6 +13,7 @@ class NewPlaylist extends StatefulWidget {
 
 class _NewPlaylistState extends State<NewPlaylist> {
   final _titleController = TextEditingController();
+  String? _errorText;
 
   @override
   void dispose() {
@@ -24,6 +26,28 @@ class _NewPlaylistState extends State<NewPlaylist> {
       Playlist(title: _titleController.text, numOfSongs: 0, songs: []),
     );
     Navigator.pop(context);
+  }
+
+  void _validateAndSubmit() {
+    final title = _titleController.text.trim();
+
+    if (title.isEmpty) {
+      setState(() => _errorText = 'This field cannot be empty');
+      return;
+    }
+
+    final exists = widget.playlists.any((p) => p.title == title);
+    if (exists) {
+      setState(
+        () =>
+            _errorText =
+                'Playlist name already exists',
+      );
+      return;
+    }
+
+    _errorText = null;
+    _submitPlaylist();
   }
 
   @override
@@ -46,6 +70,7 @@ class _NewPlaylistState extends State<NewPlaylist> {
             hintText: 'Enter playlist name',
             fillColor: colorScheme.onSecondaryContainer,
             hoverColor: colorScheme.scrim,
+            errorText: _errorText,
           ),
         ),
       ),
@@ -65,7 +90,7 @@ class _NewPlaylistState extends State<NewPlaylist> {
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,
           ),
-          onPressed: _submitPlaylist,
+          onPressed: _validateAndSubmit,
           child: Text('Save'),
         ),
       ],

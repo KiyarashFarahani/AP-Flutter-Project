@@ -34,6 +34,8 @@ class _PlaylistsState extends State<Playlists> {
     ),
   ];
 
+  
+
   void _addPlaylist(Playlist playlist) {
     setState(() {
       _playlists.add(playlist);
@@ -63,7 +65,7 @@ class _PlaylistsState extends State<Playlists> {
   }
 
   void _addNewPlaylis() {
-    showDialog(context: context, builder: (ctx) => NewPlaylist(_addPlaylist));
+    showDialog(context: context, builder: (ctx) => NewPlaylist(_addPlaylist, playlists: _playlists,));
   }
 
   @override

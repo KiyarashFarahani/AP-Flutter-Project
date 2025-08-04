@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:mono/models/song.dart';
 import 'package:mono/playlist/songs/song_item.dart';
-import 'package:mono/playlist/playlists/playlists.dart';
+
 
 class SongsList extends StatefulWidget {
   SongsList({required this.playlistTitle, required this.songs, super.key});
@@ -30,7 +30,6 @@ class _SongsListState extends State<SongsList> {
 
   @override
   Widget build(BuildContext context) {
-    AppPage currentPage = AppPage.songsInPlaylists;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
