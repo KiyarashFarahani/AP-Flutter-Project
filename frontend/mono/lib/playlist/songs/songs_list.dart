@@ -99,14 +99,7 @@ class _SongsListState extends State<SongsList> {
             IconButton(onPressed: () {},
               icon: Icon(Icons.home),),
             IconButton(onPressed: () {
-              if (currentPage == AppPage.playlists) {
-                return;
-              }
-              Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>
-                    Playlists()
-                ),
-              );
+              Navigator.pop(context);
             },
               icon: Icon(Icons.library_music),),
             IconButton(onPressed: () {},
