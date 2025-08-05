@@ -1,6 +1,9 @@
 import 'dart:ui';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mono/home.dart';
+import 'package:mono/services/socket_manager.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -15,6 +18,19 @@ class _SignUpState extends State<SignUp> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+  String? _errorMessage;
+  final SocketManager _socketManager = SocketManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _connectToServer();
+  }
+
+  Future<void> _connectToServer() async {
+    await _socketManager.connect();
+    setState(() {});
+  }
 
   @override
   void dispose() {
@@ -28,17 +44,69 @@ class _SignUpState extends State<SignUp> {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
+        _errorMessage = null;
       });
 
-      // network request
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        if (!_socketManager.isConnected) {
+          setState(() {
+            _errorMessage = "Not connected to server. Please check your connection.";
+            _isLoading = false;
+          });
+          return;
+        }
 
-      // registration logic
-      print('Email: ${_emailController.text}');
-      print('Password: ${_passwordController.text}');
+        final signUpRequest = {
+          "action": "sign_up",
+          "data": {
+            "username": _emailController.text.trim(),
+            "password": _passwordController.text,
+            "confirm_password": _confirmPasswordController.text,
+          }
+        };
 
-      if (mounted) {
+        final responseData = await _socketManager.sendWithResponse(
+          jsonEncode(signUpRequest),
+          timeout: const Duration(seconds: 10),
+        );
+
+        if (responseData == null) {
+          setState(() {
+            _errorMessage = "Server timeout. Please try again.";
+            _isLoading = false;
+          });
+          return;
+        }
+
+        final response = jsonDecode(responseData);
+        print('Signup response: $response');
+        
+        if (response['status'] == 200) {
+          final token = response['data']['token'];
+          final userId = response['data']['user_id'];
+
+          print('Sign up successful. Token: $token, User ID: $userId');
+          
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+              (Route<dynamic> route) => false,
+            );
+          }
+        } else {
+          setState(() {
+            _errorMessage = response['message'] ?? 'Sign up failed';
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
         setState(() {
+          _errorMessage = "An error occurred: $e";
           _isLoading = false;
         });
       }
@@ -238,6 +306,38 @@ class _SignUpState extends State<SignUp> {
                         return null;
                       },
                     ),
+                    const SizedBox(height: 8),
+
+                    if (_errorMessage != null)
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        margin: const EdgeInsets.only(bottom: 16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                     const SizedBox(height: 24),
 
                     _isLoading
