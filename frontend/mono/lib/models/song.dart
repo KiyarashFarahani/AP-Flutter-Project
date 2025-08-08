@@ -1,5 +1,5 @@
 class Song {
-  int? id;
+  final int? id;
   String? title;
   String? artist;
   String? album;
@@ -14,7 +14,7 @@ class Song {
   DateTime? createdAt;
   DateTime? updatedAt;
   bool? isShareable;
-  List<String>? likedByUsers;
+  final List<String>? likedByUsers;
 
   Song({
     this.id,
