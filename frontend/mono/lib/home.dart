@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:mono/bottom_navigation_bar.dart';
 
 import 'package:mono/playlist/playlists/playlists.dart';
 
@@ -270,37 +271,7 @@ class _HomePageState extends State<HomePage> {
         elevation: 8,
         child: const Icon(Icons.add, size: 28),
       ),
-      bottomNavigationBar: Container(
-        height: 60,
-        color: Colors.black,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(onPressed: () {
-                if (currentPage == AppPage.home) {
-                  return;
-                }
-                Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => HomePage()),
-                      (route) => false,
-                );
-            }, icon: Icon(Icons.home)),
-            IconButton(
-              onPressed: () {
-                if (currentPage == AppPage.playlists) {
-                  return;
-                }
-                Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => Playlists()),
-                      (route) => false,
-                );
-              },
-              icon: Icon(Icons.library_music),
-            ),
-            IconButton(onPressed: () {}, icon: Icon(Icons.person)),
-          ],
-        ),
-      ),
+      bottomNavigationBar: CustomNavigationBar(currentPage: currentPage),
     );
   }
 }
