@@ -2,10 +2,11 @@ package backend.model;
 
 import backend.exceptions.InvalidPasswordException;
 import backend.exceptions.InvalidUsernameException;
+import backend.utils.JsonDatabase;
 
 public class Admin extends User {
 
-	public Admin(String userName, String password, String email)
+	public Admin(String userName, String password)
 			throws InvalidPasswordException, InvalidUsernameException {
 		super(userName, password);
 	}
@@ -22,7 +23,7 @@ public class Admin extends User {
 
 	public void deleteUserAccount(User user) {
 		if (user != null && !(user instanceof Admin))
-			user.deleteAccount(user.getUserName(), user.getPassword());
+			JsonDatabase.deleteUser(user);
 	}
 
 	public void removePlaylist(Playlist playlist) {

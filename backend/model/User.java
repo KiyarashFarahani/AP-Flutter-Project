@@ -13,6 +13,7 @@ public class User {
     private String email;
     private Theme theme;
     private boolean sharePermission;
+    private boolean isBanned;
     private boolean validUsername;
     private boolean validPassword;
     private boolean doesExist;
@@ -72,7 +73,7 @@ public class User {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(userName, user.userName) && Objects.equals(email, user.email);
+        return Objects.equals(userName, user.userName);
     }
 
     @Override
@@ -153,9 +154,13 @@ public class User {
         return playlists;
     }
 
+    public boolean isBanned() {return isBanned;}
+
     public Set<Song> getSongs() {
         return allSongs;
     }
+
+    public Theme getTheme() {return theme;}
 
     public Set<Song> getLikedSongs() {
         return likedSongs;
