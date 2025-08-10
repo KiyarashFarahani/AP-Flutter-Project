@@ -18,7 +18,7 @@ public class JsonDatabase {
     private static final String USERS_FILE = "data/users.json";
     private static final String SONGS_FILE = "data/songs.json";
     private static final String PLAYLISTS_FILE = "data/playlists.json";
-
+    private static final String ADMINS_FILE = "data/admins.json";
 
     static Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalTime.class, new JsonDeserializer<LocalTime>() {
@@ -34,6 +34,7 @@ public class JsonDatabase {
     private static List<User> users = loadUsers();
     private static List<Song> songs = loadSongs();
     private static List<Playlist> playlists = loadPlaylists();
+    private static List<Admin> admins = loadAdmins();
 
     public static List<User> loadUsers() {
         try {
@@ -60,20 +61,20 @@ public class JsonDatabase {
         saveUsers();
     }
 
-    public static User findByUsername(String username) {
-        for (User u : loadUsers()) {
+    public static User findUserByUsername(String username) {
+        for (User u : users) {
             if (u.getUserName().equals(username)) return u;
         }
         return null;
     }
 
-    public static User findUserById(int Id) throws UserIdNotFoundException {
+    public static User findUserById(int Id) {
         for(User user : users) {
             if(user.getId()==Id) {
                 return user;
             }
         }
-        throw new UserIdNotFoundException("User ID not found!");
+        return null;
     }
 
     public static List<Song> loadSongs() {
@@ -101,25 +102,21 @@ public class JsonDatabase {
         saveSongs();
     }
 
-    public static Song getSongById(int songId) throws SongIdNotFoundException {
+    public static Song findSongById(int songId) {
         for(Song song : songs) {
-            if(song.getId()==songId) {
-                return song;
-            }
+            if(song.getId()==songId) return song;
         }
-        throw new SongIdNotFoundException("Song ID not found!");
+        return null;
     }
 
-    public static Playlist getPlaylistById(int playlistId) throws PlaylistIdNotFoundException {
+    public static Playlist findPlaylistById(int playlistId) {
         for(Playlist playlist : playlists) {
-            if(playlist.getId()==playlistId) {
-                return playlist;
-            }
+            if(playlist.getId()==playlistId) return playlist;
         }
-        throw new PlaylistIdNotFoundException("Playlist ID not found!");
+        return null;
     }
 
-    public static List<Playlist> loadPlaylists(){
+    public static List<Playlist> loadPlaylists() {
         try {
             String json= Files.readString(Path.of(PLAYLISTS_FILE));
             Type type = new TypeToken<List<Playlist>>(){}.getType();
@@ -144,14 +141,54 @@ public class JsonDatabase {
         savePlaylists();
     }
 
+    public static List<Admin> loadAdmins() {
+        try {
+            String json = Files.readString(Path.of(ADMINS_FILE));
+            Type type = new TypeToken<List<Admin>>(){}.getType();
+            return gson.fromJson(json, type);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public static void addAdmin(Admin admin) {
+        admin.setId(users.size()+1);
+        users.add(admin);
+        admins.add(admin);
+    }
+
+    public static void saveAdmins() {
+        try(FileWriter writer = new FileWriter(ADMINS_FILE)) {
+            gson.toJson(admins, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Admin findAdminByUsername(String username) {
+        for (Admin admin : admins) {
+            if (admin.getUserName().equals(username)) return admin;
+        }
+        return null;
+    }
+
+    public static Admin findAdminById(int id) {
+        for(Admin admin : admins) {
+            if(admin.getId()==id) return admin;
+        }
+        return null;
+    }
+
     public static synchronized void deleteAllUsers() {
         users.clear();
         saveUsers();
     }
 
-    public static synchronized void deleteUser(User user) {
-        users.removeIf(u -> u.getId() == user.getId());
+    public static synchronized boolean deleteUser(User user) {
+        boolean result = users.removeIf(u -> u.getId() == user.getId());
         saveUsers();
+        return result;
     }
 
     public static synchronized void deleteAllSongs() {
@@ -159,9 +196,10 @@ public class JsonDatabase {
         saveSongs();
     }
 
-    public static synchronized void deleteSong(Song song) {
-        songs.removeIf(s -> s.equals(song));
+    public static synchronized boolean deleteSong(Song song) {
+        boolean result = songs.removeIf(s -> s.equals(song));
         saveSongs();
+        return result;
     }
 
     public static synchronized void deleteAllPlaylists() {
@@ -169,8 +207,20 @@ public class JsonDatabase {
         savePlaylists();
     }
 
-    public static synchronized void deletePlaylist(Playlist playlist) {
-        playlists.removeIf(p -> p.equals(playlist));
+    public static synchronized boolean deletePlaylist(Playlist playlist) {
+        boolean result = playlists.removeIf(p -> p.equals(playlist));
         savePlaylists();
+        return result;
+    }
+
+    public static synchronized boolean deleteAdmin(Admin admin) {
+        boolean result = admins.removeIf(a -> a.getId() == admin.getId());
+        saveAdmins();
+        return result;
+    }
+
+    public static synchronized void deleteAllAdmins() {
+        admins.clear();
+        saveAdmins();
     }
 }

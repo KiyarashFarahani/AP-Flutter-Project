@@ -16,7 +16,7 @@ public class SongController {
         if (user == null)
             return new Response<>(401, null, "Invalid token");
 
-        Song song = JsonDatabase.getSongById(songId);
+        Song song = JsonDatabase.findSongById(songId);
         if (song == null)
             return new Response<>(404, null, "Song not found");
 
@@ -33,7 +33,7 @@ public class SongController {
         if (user == null)
             return new Response<>(401, null, "Invalid token");
 
-        Song song = JsonDatabase.getSongById(songId);
+        Song song = JsonDatabase.findSongById(songId);
         if (song == null)
             return new Response<>(404, null, "Song not found");
 
@@ -62,14 +62,14 @@ public class SongController {
         if (user == null)
             return new Response<>(401, null, "Invalid token");
 
-        Playlist playlist = JsonDatabase.getPlaylistById(playlistId);
+        Playlist playlist = JsonDatabase.findPlaylistById(playlistId);
         if (playlist == null || !Integer.valueOf(playlist.getOwnerId()).equals(user.getId()))
             return new Response<>(404, null, "Playlist not found");
 
         List<Integer> addedSongs = new ArrayList<>();
         for (String id : songIds) {
             int intId = Integer.parseInt(id);
-            Song song = JsonDatabase.getSongById(intId);
+            Song song = JsonDatabase.findSongById(intId);
             if (song != null && !playlist.getSongIds().contains(intId)) {
                 playlist.getSongs().add(song);
                 addedSongs.add(intId);
@@ -90,7 +90,7 @@ public class SongController {
         if (user == null)
             return new Response<>(401, null, "Invalid token");
 
-        Playlist playlist = JsonDatabase.getPlaylistById(playlistId);
+        Playlist playlist = JsonDatabase.findPlaylistById(playlistId);
         if (playlist == null || !Integer.valueOf(playlist.getOwnerId()).equals(user.getId()))
             return new Response<>(404, null, "Playlist not found");
 
@@ -130,15 +130,15 @@ public class SongController {
         if (sender == null)
             return new Response<>(401, null, "Invalid token");
 
-        User recipient = JsonDatabase.findByUsername(recipientUsername);
+        User recipient = JsonDatabase.findUserByUsername(recipientUsername);
         if (recipient == null)
             return new Response<>(404, null, "Recipient user not found");
 
         if (!recipient.isSharePermission())
             return new Response<>(403, null, "Recipient has not enabled song sharing");
 
-        if (!recipient.getSongs().contains(JsonDatabase.getSongById(songId))) {
-            recipient.getSongs().add(JsonDatabase.getSongById(songId));
+        if (!recipient.getSongs().contains(JsonDatabase.findSongById(songId))) {
+            recipient.getSongs().add(JsonDatabase.findSongById(songId));
             JsonDatabase.saveUsers();
         }
 
@@ -150,11 +150,11 @@ public class SongController {
         if (sender == null)
             return new Response<>(401, null, "Invalid token");
 
-        Playlist playlist = JsonDatabase.getPlaylistById(playlistId);
+        Playlist playlist = JsonDatabase.findPlaylistById(playlistId);
         if (playlist == null || !Integer.valueOf(playlist.getOwnerId()).equals(sender.getId()))
             return new Response<>(403, null, "Playlist not found or does not belong to you");
 
-        User recipient = JsonDatabase.findByUsername(recipientUsername);
+        User recipient = JsonDatabase.findUserByUsername(recipientUsername);
         if (recipient == null)
             return new Response<>(404, null, "Recipient not found");
 

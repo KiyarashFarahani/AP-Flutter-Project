@@ -15,7 +15,7 @@ public class UserController {
         if (!password.trim().equals(confirmPassword.trim())) {
             return new Response<>(400, null, "Passwords do not match");
         }
-        if (JsonDatabase.findByUsername(username) != null) {
+        if (JsonDatabase.findUserByUsername(username) != null) {
             return new Response<>(409, null, "Username already exists");
         }
         User user = new User();
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     public Response<?> login(String username, String password) {
-        User user = JsonDatabase.findByUsername(username);
+        User user = JsonDatabase.findUserByUsername(username);
         if (user == null || !Objects.equals(user.getPassword(), password)) {
             return new Response<>(401, null, "Invalid username or password");
         }
@@ -66,7 +66,7 @@ public class UserController {
         if (userId == null) {
             return new Response<>(401, null, "Invalid token");
         }
-        if (JsonDatabase.findByUsername(newUsername) != null) {
+        if (JsonDatabase.findUserByUsername(newUsername) != null) {
             return new Response<>(409, null, "Username is already taken");
         }
         User user = JsonDatabase.findUserById(userId);
