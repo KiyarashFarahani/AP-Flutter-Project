@@ -153,9 +153,11 @@ public class JsonDatabase {
     }
 
     public static void addAdmin(Admin admin) {
-        admin.setId(users.size()+1);
-        users.add(admin);
+        admin.setId(admins.size()+1);
         admins.add(admin);
+        users.add(admin);
+        saveAdmins();
+        saveUsers();
     }
 
     public static void saveAdmins() {
