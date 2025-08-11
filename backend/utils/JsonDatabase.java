@@ -63,7 +63,7 @@ public class JsonDatabase {
 
     public static User findUserByUsername(String username) {
         for (User u : users) {
-            if (u.getUserName().equals(username)) return u;
+            if (u.getUsername().equals(username)) return u;
         }
         return null;
     }
@@ -153,11 +153,10 @@ public class JsonDatabase {
     }
 
     public static void addAdmin(Admin admin) {
-        admin.setId(admins.size()+1);
-        admins.add(admin);
+        admin.setId(users.size()+1);
         users.add(admin);
+        admins.add(admin);
         saveAdmins();
-        saveUsers();
     }
 
     public static void saveAdmins() {
@@ -170,7 +169,7 @@ public class JsonDatabase {
 
     public static Admin findAdminByUsername(String username) {
         for (Admin admin : admins) {
-            if (admin.getUserName().equals(username)) return admin;
+            if (admin.getUsername().equals(username)) return admin;
         }
         return null;
     }

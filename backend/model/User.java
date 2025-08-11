@@ -1,5 +1,6 @@
 package backend.model;
 
+import backend.Validator;
 import backend.exceptions.InvalidPasswordException;
 import backend.exceptions.InvalidUsernameException;
 
@@ -8,14 +9,11 @@ import java.time.LocalTime;
 
 public class User {
     private int id;
-    private String userName;
+    private String username;
     private String password;
     private String email;
     private Theme theme;
     private boolean sharePermission;
-    private boolean isBanned;
-    private boolean validUsername;
-    private boolean validPassword;
     private boolean doesExist;
     private String profileImageUrl;
     private Set<Song> likedSongs;
@@ -26,9 +24,9 @@ public class User {
     public User() {}
 
     public User(String userName, String password) throws InvalidPasswordException, InvalidUsernameException {
-        validUsername(userName);
-        validPassword(password, userName);
-        this.userName = userName;
+        validateUsername(userName);
+        validatePassword(password, userName);
+        this.username = userName;
         this.password = password;
         this.theme = Theme.LIGHT;
         sharePermission = true;
@@ -39,33 +37,17 @@ public class User {
         downloadedSongs= new HashMap<>();
     }
 
-    public  void validPassword(String password, String userName) throws InvalidPasswordException {
-        if(password == null || password.trim().isEmpty())
-            throw new InvalidPasswordException("Password is required. Please enter your password to continue.");
-        if(password.length()<8)
-            throw new InvalidPasswordException("Your password must be at least 8 characters long.");
-        if(!password.matches(".*[a-z].*"))
-            throw new InvalidPasswordException("Your password must contain at least one lowercase letter (a–z).");
-        if(!password.matches(".*[A-Z].*"))
-            throw new InvalidPasswordException("Your password must contain at least one uppercase letter (A–Z).");
-        if(!password.matches(".*\\d.*"))
-            throw new InvalidPasswordException("Your password must include at least one number (0–9).");
-        if(password.contains(userName))
-            throw new InvalidPasswordException("Your password must not contain your username.");
-        else
-            validPassword = true;
+    public void validatePassword(String password, String userName) throws InvalidPasswordException {
+        String error = Validator.getPasswordValidationError(password,userName);
+        if(error!=null) {
+            throw new InvalidPasswordException(error);
+        }
     }
 
-    public void validUsername(String userName) throws InvalidUsernameException {
-        if(userName == null || userName.trim().isEmpty()) {
-            throw new InvalidUsernameException("Username is required. Please enter your email or phone number.");
-        }
-        if(!userName.matches("^[\\w._%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$") &&
-                !userName.matches("^\\+?[0-9]{10,15}$")) {
-            throw new InvalidUsernameException("Username must be a valid email address or phone number.");
-        }
-        else {
-            validUsername= true;
+    public void validateUsername(String userName) throws InvalidUsernameException {
+        String error = Validator.getUsernameValidationError(userName);
+        if(error!=null) {
+            throw new InvalidUsernameException(error);
         }
     }
 
@@ -73,12 +55,12 @@ public class User {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(userName, user.userName);
+        return Objects.equals(username, user.username);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userName, email);
+        return Objects.hash(username, email);
     }
 
     public void addSong(Song song) {
@@ -145,7 +127,7 @@ public class User {
     }
 
     public void deleteAccount(String userName, String password) {
-        if(userName.equals(this.userName)&& password.equals(this.password)) {
+        if(userName.equals(this.username)&& password.equals(this.password)) {
             doesExist = false;
         }
     }
@@ -153,8 +135,6 @@ public class User {
     public Set<Playlist> getPlaylists() {
         return playlists;
     }
-
-    public boolean isBanned() {return isBanned;}
 
     public Set<Song> getSongs() {
         return allSongs;
@@ -182,12 +162,12 @@ public class User {
         this.password = password;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserName(String username) {
+        this.username = username;
     }
 
     public boolean isSharePermission() {
