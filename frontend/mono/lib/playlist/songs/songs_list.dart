@@ -3,8 +3,7 @@ import 'dart:ui';
 
 import 'package:mono/models/song.dart';
 import 'package:mono/playlist/songs/song_item.dart';
-import 'package:mono/bottom_navigation_bar.dart';
-import 'package:mono/playlist/playlists/playlists.dart';
+
 
 
 class SongsList extends StatefulWidget {
@@ -91,7 +90,6 @@ class _SongsListState extends State<SongsList> {
         child: Icon(Icons.add, size: 28),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: CustomNavigationBar(currentPage: AppPage.songsInPlaylists),
     );
   }
 }

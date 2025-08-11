@@ -5,8 +5,8 @@ import 'package:mono/models/playlist.dart';
 import 'package:mono/models/song.dart';
 import 'package:mono/playlist/playlists/new_playlist.dart';
 import 'package:mono/playlist/playlists/playlists_list.dart';
-import 'package:mono/home.dart';
-import 'package:mono/bottom_navigation_bar.dart';
+
+
 
 class Playlists extends StatefulWidget {
   const Playlists({super.key});
@@ -71,7 +71,6 @@ class _PlaylistsState extends State<Playlists> {
 
   @override
   Widget build(BuildContext context) {
-    AppPage currentPage = AppPage.playlists;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
@@ -120,7 +119,6 @@ class _PlaylistsState extends State<Playlists> {
         elevation: 8,
         child: const Icon(Icons.add, size: 28),
       ),
-      bottomNavigationBar: CustomNavigationBar(currentPage: currentPage),
     );
   }
 }

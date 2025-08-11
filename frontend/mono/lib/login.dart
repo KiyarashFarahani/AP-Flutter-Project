@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mono/home.dart';
+import 'package:mono/main_page.dart';
 import 'package:mono/signup.dart';
 import 'package:mono/services/socket_manager.dart';
 
@@ -92,7 +92,7 @@ class _LoginState extends State<Login> {
 
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
+              MaterialPageRoute(builder: (context) => const MainPage()),
               (Route<dynamic> route) => false,
             );
           }

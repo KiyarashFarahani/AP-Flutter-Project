@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:mono/bottom_navigation_bar.dart';
 
-import 'package:mono/playlist/playlists/playlists.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -86,7 +85,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    AppPage currentPage = AppPage.home;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -271,7 +269,6 @@ class _HomePageState extends State<HomePage> {
         elevation: 8,
         child: const Icon(Icons.add, size: 28),
       ),
-      bottomNavigationBar: CustomNavigationBar(currentPage: currentPage),
     );
   }
 }

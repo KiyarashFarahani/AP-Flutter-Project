@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mono/home.dart';
 import 'package:mono/services/socket_manager.dart';
+import 'package:mono/main_page.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -94,7 +94,7 @@ class _SignUpState extends State<SignUp> {
 
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
+              MaterialPageRoute(builder: (context) => const MainPage()),
               (Route<dynamic> route) => false,
             );
           }
