@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:mono/home.dart';
 import 'package:mono/playlist/playlists/playlists.dart';
+import 'package:mono/song_explorer.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -16,6 +17,7 @@ class _MainPageState extends State<MainPage> {
   final _pages = const [
     HomePage(),
     Playlists(),
+    SongExplorer(),
     //Profile()
   ];
 
@@ -38,15 +40,16 @@ class _MainPageState extends State<MainPage> {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.library_music),
-            label: 'Playlists',
-          ),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
           NavigationDestination(
             icon: Badge(child: Icon(Icons.search)),
             label: 'Search',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.library_music),
+            label: 'Playlists',
+          ),
+          
         ],
       ),
     );
