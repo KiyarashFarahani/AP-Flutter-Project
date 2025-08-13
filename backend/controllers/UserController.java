@@ -8,6 +8,7 @@ import backend.utils.TokenManager;
 import com.google.gson.Gson;
 
 import java.util.*;
+import java.util.HashMap;
 
 public class UserController {
 
@@ -117,5 +118,45 @@ public class UserController {
         user.setTheme(newTheme);
         JsonDatabase.saveUsers();
         return new Response<>(200, null, "Dark/Light Mode updated successfully");
+    }
+
+    public Response<?> updateProfilePicture(String token, String profileImageUrl) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null) {
+            return new Response<>(401, null, "Invalid token");
+        }
+        User user = JsonDatabase.findUserById(userId);
+        user.setProfileImageUrl(profileImageUrl);
+        JsonDatabase.saveUsers();
+        return new Response<>(200, null, "Profile picture updated successfully");
+    }
+
+    public Response<?> removeProfilePicture(String token) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null) {
+            return new Response<>(401, null, "Invalid token");
+        }
+        User user = JsonDatabase.findUserById(userId);
+        user.setProfileImageUrl(null);
+        JsonDatabase.saveUsers();
+        return new Response<>(200, null, "Profile picture removed successfully");
+    }
+
+    public Response<?> getUserInfo(String token) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null) {
+            return new Response<>(401, null, "Invalid token");
+        }
+        User user = JsonDatabase.findUserById(userId);
+        if (user == null) {
+            return new Response<>(404, null, "User not found");
+        }
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("username", user.getUsername());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("theme", user.getTheme());
+        userInfo.put("share_permission", user.isSharePermission());
+        userInfo.put("profile_image_url", user.getProfileImageUrl());
+        return new Response<>(200, userInfo, "User information retrieved successfully");
     }
 }

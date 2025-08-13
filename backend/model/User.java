@@ -72,6 +72,14 @@ public class User {
     }
 
     public void setProfilePicture() {}
+    
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+    
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
 
     public void toggleLike(Song song) {
         if(likedSongs.contains(song)) {
