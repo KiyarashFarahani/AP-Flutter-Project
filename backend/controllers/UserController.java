@@ -5,7 +5,6 @@ import backend.model.Theme;
 import backend.model.User;
 import backend.utils.JsonDatabase;
 import backend.utils.TokenManager;
-import com.google.gson.Gson;
 
 import java.util.*;
 import java.util.HashMap;
@@ -51,6 +50,7 @@ public class UserController {
             return new Response<>(401, null, "Invalid token");
         }
         User user = JsonDatabase.findUserById(userId);
+        assert user != null;
         if (!Objects.equals(user.getPassword(), oldPassword)) {
             return new Response<>(400, null, "Old password is incorrect");
         }
@@ -71,6 +71,7 @@ public class UserController {
             return new Response<>(409, null, "Username is already taken");
         }
         User user = JsonDatabase.findUserById(userId);
+        assert user != null;
         user.setUserName(newUsername);
         JsonDatabase.saveUsers();
         return new Response<>(200, null, "Username changed successfully");
@@ -90,6 +91,7 @@ public class UserController {
             return new Response<>(401, null, "Invalid token");
         }
         User user = JsonDatabase.findUserById(userId);
+        assert user != null;
         if (!Objects.equals(user.getPassword(), password)) {
             return new Response<>(400, null, "Password is incorrect");
         }
@@ -104,6 +106,7 @@ public class UserController {
             return new Response<>(401, null, "Invalid token");
         }
         User user = JsonDatabase.findUserById(userId);
+        assert user != null;
         user.setSharePermission(sharePermission);
         JsonDatabase.saveUsers();
         return new Response<>(200, null, "Sharing permission updated successfully");
@@ -115,6 +118,7 @@ public class UserController {
             return new Response<>(401, null, "Invalid token");
         }
         User user = JsonDatabase.findUserById(userId);
+        assert user != null;
         user.setTheme(newTheme);
         JsonDatabase.saveUsers();
         return new Response<>(200, null, "Dark/Light Mode updated successfully");
@@ -126,6 +130,7 @@ public class UserController {
             return new Response<>(401, null, "Invalid token");
         }
         User user = JsonDatabase.findUserById(userId);
+        assert user != null;
         user.setProfileImageUrl(profileImageUrl);
         JsonDatabase.saveUsers();
         return new Response<>(200, null, "Profile picture updated successfully");
@@ -137,6 +142,7 @@ public class UserController {
             return new Response<>(401, null, "Invalid token");
         }
         User user = JsonDatabase.findUserById(userId);
+        assert user != null;
         user.setProfileImageUrl(null);
         JsonDatabase.saveUsers();
         return new Response<>(200, null, "Profile picture removed successfully");
