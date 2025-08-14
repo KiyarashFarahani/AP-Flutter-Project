@@ -19,7 +19,7 @@ class _LoginState extends State<Login> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
-  final SocketManager _socketManager = SocketManager();
+  final _socketManager = SocketManager();
 
 
   @override

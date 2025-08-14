@@ -19,7 +19,7 @@ class _SignUpState extends State<SignUp> {
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
-  final SocketManager _socketManager = SocketManager();
+  final _socketManager  = SocketManager();
 
   @override
   void initState() {

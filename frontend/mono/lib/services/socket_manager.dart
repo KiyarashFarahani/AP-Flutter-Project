@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:typed_data';
 
 class SocketManager {
   static final SocketManager _instance = SocketManager._internal();
   Socket? _socket;
   Function(String)? _responseCallback;
+  Function(List<int>)? _audioCallback;
   bool _isConnected = false;
 
   factory SocketManager() {
@@ -22,18 +24,24 @@ class SocketManager {
     print('Connecting to $serverIp:$port...');
 
     try {
-      _socket = await Socket.connect(serverIp, port, timeout: const Duration(seconds: 10));
+      _socket = await Socket.connect(
+        serverIp,
+        port,
+        timeout: const Duration(seconds: 10),
+      );
       _isConnected = true;
       print('Successfully connected to server at $serverIp:$port');
 
       _socket!.listen(
-        (List<int> data) {
-          final response = utf8.decode(data);
-          print('Server says: $response');
-
-          if (_responseCallback != null) {
-            _responseCallback!(response);
-            _responseCallback = null;
+        (data) {
+          try {
+            final decoded = utf8.decode(data);
+            final jsonData = jsonDecode(decoded);
+            _responseCallback?.call(jsonEncode(jsonData));
+          } catch (_) {
+               if (_audioCallback != null) {
+            _audioCallback!((data));
+          }
           }
         },
         onDone: () {
@@ -61,14 +69,17 @@ class SocketManager {
     }
   }
 
-  Future<String?> sendWithResponse(String message, {Duration timeout = const Duration(seconds: 5)}) async {
+  Future<String?> sendWithResponse(
+    String message, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     if (_socket == null || !_isConnected) {
       print('Socket not connected');
       return null;
     }
 
     Completer<String?> completer = Completer<String?>();
-    
+
     _responseCallback = (String response) {
       if (!completer.isCompleted) {
         completer.complete(response);
@@ -76,6 +87,7 @@ class SocketManager {
     };
 
     _socket!.write(message + '\n');
+    await _socket!.flush();
 
     try {
       return await completer.future.timeout(timeout);
@@ -86,6 +98,49 @@ class SocketManager {
       return null;
     }
   }
+
+  Future<Uint8List?> getSongBytes(String request) async {
+  if (_socket == null || !_isConnected) return null;
+
+  final completer = Completer<Uint8List?>();
+  final bytes = <int>[];
+  bool metadataReceived = false;
+
+  
+  void dataHandler(List<int> chunk) {
+    try {
+     
+      if (!metadataReceived) {
+        final jsonStr = utf8.decode(chunk);
+        final json = jsonDecode(jsonStr);
+        print("Metadata: $json");
+        metadataReceived = true;
+        return;
+      }
+    } catch (_) {
+      
+      bytes.addAll(chunk);
+    }
+  }
+
+  _audioCallback = dataHandler;
+  _socket!.write(request + '\n');
+  await _socket!.flush();
+
+ 
+  await Future.delayed(Duration(seconds: 5));
+  _audioCallback = null;
+
+  if (bytes.isNotEmpty) {
+    completer.complete(Uint8List.fromList(bytes));
+  } else {
+    completer.complete(null);
+  }
+
+  return completer.future;
+}
+
+  
 
   Socket? get socket => _socket;
   bool get isConnected => _isConnected;
