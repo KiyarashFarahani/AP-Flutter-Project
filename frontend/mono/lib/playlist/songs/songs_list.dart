@@ -7,7 +7,8 @@ import 'package:mono/playlist/songs/song_item.dart';
 
 
 class SongsList extends StatefulWidget {
-  SongsList({required this.playlistTitle, required this.songs, super.key});
+  const SongsList({required this.playlistTitle, required this.songs, super.key});
+
   final String playlistTitle;
   final List<Song> songs;
   @override
