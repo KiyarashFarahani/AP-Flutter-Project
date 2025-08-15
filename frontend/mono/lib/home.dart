@@ -602,6 +602,14 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 },
+                                /* onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => NowPlayingPage(songTitle: songs[index]),
+                                    ),
+                                  );
+                                 }, */ //TODO: For later use...
                               ),
                             ),
                           ),
