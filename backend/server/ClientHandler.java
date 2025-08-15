@@ -137,6 +137,33 @@ public class ClientHandler implements Runnable {
                                 CreateNewPlaylistData.class);
                         response = songController.createPlaylist(token, data.getPlayListName());
                     }
+                    case "upload_song" -> {
+                        UploadSongData data = gson.fromJson(gson.toJson(request.getData()), UploadSongData.class);
+                        
+                        response = new Response<>(200, null, "Ready to receive file");
+                        out.println(gson.toJson(response));
+                        out.flush();
+                        
+                        try {
+                            FileUploadHandler uploadHandler = new FileUploadHandler(
+                                data.getFilename(), 
+                                socket.getInputStream(), 
+                                data.getFilesize()
+                            );
+                            boolean uploadSuccess = uploadHandler.receiveFile();
+                            
+                            if (uploadSuccess) {
+                                System.out.println("Song uploaded successfully: " + data.getFilename());
+                            } else {
+                                System.out.println("Song upload failed: " + data.getFilename());
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Error during file upload: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                        
+                        continue;
+                    }
                     default -> {
                         response = new Response<>(400, null, "Unknown action: " + action);
                     }
