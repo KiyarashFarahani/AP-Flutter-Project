@@ -200,7 +200,13 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(width: 20),
-                  Text('Uploading ${file.name}...'),
+                  Expanded(
+                    child: Text(
+                      'Uploading ${file.name}...',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ),
                 ],
               ),
             );
