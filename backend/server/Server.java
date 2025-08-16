@@ -16,6 +16,9 @@ public class Server {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connected: " + socket.getInetAddress());
 
+                socket.setSoTimeout(30000);
+                socket.setKeepAlive(true);
+
                 executor.submit(new ClientHandler(socket));
 
             }
