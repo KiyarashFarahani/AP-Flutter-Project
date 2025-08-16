@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,14 +35,24 @@ public class ClientHandler implements Runnable {
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
         ) {
 
-            while (true) {
+            while (!socket.isClosed()) {
                 String inputLine = in.readLine();
+
+                if (inputLine == null) {
+                    System.out.println("Client disconnected: " + socket.getInetAddress());
+                    break;
+                }
 
                 System.out.println("Received request: " + inputLine);
                 Request<?> request = gson.fromJson(inputLine, new TypeToken<Request<Object>>(){}.getType());
                 String action = request.getAction();
                 String token = request.getToken();
                 Response<?> response;
+
+                if (socket.isClosed()) {
+                    System.out.println("Socket closed during request processing");
+                    break;
+                }
 
                 switch (action) {
                     case "sign_up" -> {
@@ -91,7 +102,7 @@ public class ClientHandler implements Runnable {
                         Map<String, Long> outData = new HashMap<>();
                         outData.put("filesize", file.length());
                         response = new Response<>(200, outData, "File info ready");
-                       requestHandler = new FileRequestHandler(filename, socket.getOutputStream());
+                       requestHandler = new FileRequestHandler(filename, socket.getOutputStream(), socket);
 
                     }
                     case "delete_account" -> {
@@ -171,14 +182,33 @@ public class ClientHandler implements Runnable {
 
                 String responseJson = gson.toJson(response);
                 System.out.println("Sending response: " + responseJson);
-                out.println(responseJson);
-                if (action.equals("get_song")) {
-                    requestHandler.sendFile();
+                if (!socket.isClosed()) {
+                    out.println(responseJson);
+                    if (action.equals("get_song")) {
+                        requestHandler.sendFile();
+                    }
+                } else {
+                    System.out.println("Socket closed, cannot send response");
+                    break;
                 }
 
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            if (socket.isClosed()) {
+                System.out.println("Client disconnected: " + socket.getInetAddress());
+            } else if (e instanceof SocketTimeoutException) {
+                System.out.println("Client timeout: " + socket.getInetAddress());
+            } else {
+                System.err.println("ClientHandler Error: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } finally {
+            try {
+                if (!socket.isClosed())
+                    socket.close();
+            } catch (IOException e) {
+                System.err.println("Couldn't closing socket: " + e.getMessage());
+            }
         }
     }
 }
