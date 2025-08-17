@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:async';
+import 'dart:ui';
+import 'package:marquee/marquee.dart';
 import 'package:mono/services/socket_manager.dart';
+import 'package:mono/models/song.dart';
 
 class SongExplorer extends StatefulWidget {
   const SongExplorer({super.key});
@@ -14,18 +15,34 @@ class SongExplorer extends StatefulWidget {
 
 class _SongExplorerState extends State<SongExplorer> {
   final _socketManager = SocketManager();
-  StreamController<List<int>> _audioStreamController = StreamController<List<int>>();
   final _player = AudioPlayer();
-  List<String> songs = [];
+  List<Song> songs = [];
+  late List<Song> filteredSongs;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadSongs();
+    _searchController.addListener(_filterSongs);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterSongs() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      songs = filteredSongs
+              .where((song) => song.title!.toLowerCase().contains(query))
+              .toList();
+    });
   }
 
   Future<void> _loadSongs() async {
-    final List<String> list;
     final listSongsRequest = jsonEncode({"action": "list_songs"});
     final response = await _socketManager.sendWithResponse(
       listSongsRequest,
@@ -33,30 +50,38 @@ class _SongExplorerState extends State<SongExplorer> {
     );
 
     if (response == null) throw Exception("No response from server");
-    
-    print('from songExplorer1:' + response);
-    
+
     try {
       final Map<String, dynamic> jsonMap = jsonDecode(response);
-       final List<dynamic> dataList = jsonMap['data'] ?? [];
-      
-      list =
-          dataList
-      .map<String>((item) => (item as Map<String, dynamic>)['title'] as String)
-      .toList();
+      final List<dynamic> songsJsonList = jsonMap['data'] as List<dynamic>;
+
+      final List<Song> list =
+          songsJsonList
+              .map(
+                (songsJson) => Song(
+                  title: songsJson['title'] ?? "Unknown",
+                  artist: songsJson['artist'] ?? "Unknown",
+                  cover: songsJson['cover'] ?? "",
+                ),
+              )
+              .toList();
+
+      setState(() => songs = filteredSongs = list,);
     } catch (e) {
       print('JSON Parse Error: $e\nResponse: $response');
       throw Exception('Invalid server response');
     }
-    setState(() => songs = list);
   }
 
   Future<void> _playSong(String filename) async {
-    final request = jsonEncode({"action": "get_song", "data": {"filename": filename}});
+    final request = jsonEncode({
+      "action": "get_song",
+      "data": {"filename": filename},
+    });
     final bytes = await _socketManager.getSongBytes(request);
-    
+
     if (bytes != null && bytes.isNotEmpty) {
-      await _player.play(BytesSource(bytes)); 
+      await _player.play(BytesSource(bytes));
     } else {
       print("Error: Received empty bytes");
     }
@@ -64,22 +89,251 @@ class _SongExplorerState extends State<SongExplorer> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: Text("Song Explorer")),
-      body:
-          songs.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                itemCount: songs.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(songs[index]),
-                    onTap: () {
-                      _playSong(songs[index]);
-                    },
-                  );
-                },
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colorScheme.primary,
+                  colorScheme.inversePrimary,
+                  colorScheme.onPrimary,
+                ],
               ),
+            ),
+          ),
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Color.fromRGBO(0, 0, 0, 0.2)),
+          ),
+          Column(
+            children: [
+              AppBar(
+                title: Text(
+                  'Song Explorer',
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                automaticallyImplyLeading: false,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Search songs...',
+                    hintStyle: textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                    ),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                    filled: true,
+                    fillColor: Colors.black26,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child:
+                    songs.isEmpty
+                        ? Center(child: CircularProgressIndicator())
+                        : GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: 0.7,
+                              ),
+                          itemCount: songs.length,
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {},
+                              onLongPress: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    52,
+                                    52,
+                                    52,
+                                  ),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20),
+                                    ),
+                                  ),
+                                  builder: (context) {
+                                    return Wrap(
+                                      children: [
+                                        ListTile(
+                                          leading: const Icon(
+                                            Icons.bookmark_added_outlined,
+                                            color: Colors.white,
+                                          ),
+                                          title: Text(
+                                            'Add song to account',
+                                            style: textTheme.titleMedium
+                                                ?.copyWith(color: Colors.white),
+                                          ),
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            // TODO: implement ability of adding song to account(home page)
+                                          },
+                                        ),
+                                        ListTile(
+                                          leading: const Icon(
+                                            Icons.share,
+                                            color: Colors.white,
+                                          ),
+                                          title: Text(
+                                            'Share Song',
+                                            style: textTheme.titleMedium
+                                                ?.copyWith(color: Colors.white),
+                                          ),
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            // TODO: implement sharing
+                                          },
+                                        ),
+                                        ListTile(
+                                          leading: const Icon(
+                                            Icons.favorite_border,
+                                            color: Colors.white,
+                                          ),
+                                          title: Text(
+                                            'Like Song',
+                                            style: textTheme.titleMedium
+                                                ?.copyWith(color: Colors.white),
+                                          ),
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            // TODO: implement liking logic
+                                          },
+                                        ),
+                                        ListTile(
+                                          leading: const Icon(
+                                            Icons.download,
+                                            color: Colors.white,
+                                          ),
+                                          title: Text(
+                                            'Download',
+                                            style: textTheme.titleMedium
+                                                ?.copyWith(color: Colors.white),
+                                          ),
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            // TODO: implement download method
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.asset(
+                                      'assets/images/default.png',
+                                      height: 120,
+                                      width: double.infinity,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  buildSongTitle(
+                                    songs[index].title!.replaceAll('.mp3', ''),
+                                    100,
+                                    textTheme,
+                                    colorScheme,
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    songs[index].artist ?? 'Unknown Artist',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Widget buildSongTitle(
+  String title,
+  double maxWidth,
+  TextTheme textTheme,
+  ColorScheme colorScheme,
+) {
+  final textPainter = TextPainter(
+    text: TextSpan(
+      text: title,
+      style: textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: colorScheme.onSurface,
+      ),
+    ),
+    maxLines: 1,
+    textDirection: TextDirection.ltr,
+  )..layout();
+
+  final textWidth = textPainter.width;
+
+  if (textWidth > maxWidth) {
+    return SizedBox(
+      height: 20,
+      width: maxWidth,
+      child: Marquee(
+        text: title,
+        style: textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        ),
+        scrollAxis: Axis.horizontal,
+        blankSpace: 20,
+        velocity: 20,
+        pauseAfterRound: const Duration(seconds: 0),
+      ),
+    );
+  } else {
+    return SizedBox(
+      width: maxWidth,
+      child: Text(
+        title,
+        style: textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.clip,
+      ),
     );
   }
 }

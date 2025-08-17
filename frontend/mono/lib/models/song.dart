@@ -2,6 +2,7 @@ class Song {
   final int? id;
   String? title;
   String? artist;
+  String? cover;
   String? album;
   String? genre;
   int? duration;
@@ -20,6 +21,7 @@ class Song {
     this.id,
     this.title,
     this.artist,
+    this.cover,
     this.album,
     this.genre,
     this.duration,

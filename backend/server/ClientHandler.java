@@ -9,12 +9,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.images.Artwork;
+
 
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Base64;
 
 public class ClientHandler implements Runnable {
     private final Socket socket;
@@ -85,15 +92,49 @@ public class ClientHandler implements Runnable {
                         File[] files = dir.listFiles((d, name) -> name.endsWith(".mp3"));
 
                         JsonArray songArray = new JsonArray();
-                        if(files != null) {
-                            for (File f: files) {
+
+                        if (files != null) {
+                            for (File f : files) {
+                                String base64Cover = "No cover found";
+                                String artist = "Unknown artist";
+                                String title = "null";
+
+                                try {
+                                    AudioFile audioFile = AudioFileIO.read(f);
+                                    Tag tag = audioFile.getTag();
+
+                                    if (tag != null) {
+                                        Artwork artwork = tag.getFirstArtwork();
+                                        if (artwork != null) {
+                                            byte[] imageData = artwork.getBinaryData();
+                                            base64Cover = Base64.getEncoder().encodeToString(imageData)
+                                                    .replaceAll("\\s+", "");
+                                        }
+                                        String tagArtist = tag.getFirst(FieldKey.ARTIST);
+                                        if (tagArtist != null && !tagArtist.isBlank()) {
+                                            artist = tagArtist;
+                                        }
+                                        String tagTitle = tag.getFirst(FieldKey.TITLE);
+                                        if (tagTitle != null && !tagTitle.isBlank()) {
+                                            title = tagTitle;
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    System.err.println("Failed to read metadata for file: " + f.getName());
+                                    e.printStackTrace();
+                                }
+
+
                                 JsonObject songObject = new JsonObject();
-                                songObject.addProperty("title", f.getName());
+                                songObject.addProperty("title", title);
+                                songObject.addProperty("artist", artist);
+                                //songObject.addProperty("cover", base64Cover);
+
                                 songArray.add(songObject);
                             }
                         }
-                        response = new Response<>(200, songArray, "Songs listed successfully" );
 
+                        response = new Response<>(200, songArray, "Songs listed successfully");
                     }
                     case "get_song" -> {
                         GetSongData data = gson.fromJson(gson.toJson(request.getData()), GetSongData.class);
@@ -184,6 +225,7 @@ public class ClientHandler implements Runnable {
                 System.out.println("Sending response: " + responseJson);
                 if (!socket.isClosed()) {
                     out.println(responseJson);
+                    out.flush();
                     if (action.equals("get_song")) {
                         requestHandler.sendFile();
                     }
