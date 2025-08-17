@@ -10,6 +10,9 @@ class SocketManager {
   Function(List<int>)? _audioCallback;
   bool _isConnected = false;
   bool _isRequestInProgress = false;
+  bool _isReconnecting = false;
+  Timer? _reconnectTimer;
+  final List<String> _pendingRequests = [];
 
   factory SocketManager() {
     return _instance;
@@ -42,7 +45,11 @@ class SocketManager {
       );
       _isConnected = true;
       _isRequestInProgress = false;
+      _isReconnecting = false;
       print('Successfully connected to server at $serverIp:$port');
+
+
+      _processPendingRequests();
 
       _socket!.listen(
         (data) {
@@ -58,17 +65,11 @@ class SocketManager {
         },
         onDone: () {
           print('Server closed connection');
-          _isConnected = false;
-          _isRequestInProgress = false;
-          _socket!.destroy();
-          _socket = null;
+          _handleDisconnection();
         },
         onError: (error) {
           print('Socket error: $error');
-          _isConnected = false;
-          _isRequestInProgress = false;
-          _socket!.destroy();
-          _socket = null;
+          _handleDisconnection();
         },
       );
     } catch (e) {
@@ -76,14 +77,52 @@ class SocketManager {
       _isConnected = false;
       _isRequestInProgress = false;
       _socket = null;
+      _scheduleReconnect();
     }
+  }
+
+
+  void _handleDisconnection() {
+    _isConnected = false;
+    _isRequestInProgress = false;
+    _socket?.destroy();
+    _socket = null;
+    _scheduleReconnect();
+  }
+
+  void _scheduleReconnect() {
+    if (_isReconnecting) return;
+    _isReconnecting = true;
+    print('Scheduling reconnection...');
+    
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(const Duration(seconds: 2), () async {
+      if (!_isConnected) {
+        print('Attempting to reconnect...');
+        await connect();
+      }
+    });
+  }
+
+  void _processPendingRequests() {
+    if (_pendingRequests.isEmpty) return;
+    
+    print('Processing ${_pendingRequests.length} pending requests...');
+    for (final request in _pendingRequests) {
+      send(request);
+    }
+    _pendingRequests.clear();
   }
 
   void send(String message) {
     if (_socket != null && _isConnected) {
       _socket!.write(message + '\n');
     } else {
-      print('Socket not connected');
+      print('Socket not connected, queuing request for later');
+      _pendingRequests.add(message);
+      if (!_isReconnecting) {
+        _scheduleReconnect();
+      }
     }
   }
 
@@ -92,8 +131,12 @@ class SocketManager {
     Duration timeout = const Duration(seconds: 5),
   }) async {
     if (_socket == null || !_isConnected) {
-      print('Socket not connected');
-      return null;
+      print('Socket not connected, attempting to reconnect...');
+      await connect();
+      if (!_isConnected) {
+        print('Failed to reconnect, request cannot be processed');
+        return null;
+      }
     }
 
     if (_isRequestInProgress) {
@@ -134,7 +177,15 @@ class SocketManager {
   }
 
   Future<Uint8List?> getSongBytes(String request) async {
-  if (_socket == null || !_isConnected) return null;
+    if (_socket == null || !_isConnected) {
+      print('Socket not connected for song request, attempting to reconnect...');
+      await connect();
+      
+      if (!_isConnected) {
+        print('Failed to reconnect for song request');
+        return null;
+      }
+    }
 
   final completer = Completer<Uint8List?>();
   final bytes = <int>[];
@@ -175,7 +226,15 @@ class SocketManager {
 }
 
   Future<bool> uploadSong(String filename, Uint8List fileBytes, String token) async {
-    if (_socket == null || !_isConnected) return false;
+    if (_socket == null || !_isConnected) {
+      print('Socket not connected for upload, attempting to reconnect...');
+      await connect();
+      
+      if (!_isConnected) {
+        print('Failed to reconnect for upload');
+        return false;
+      }
+    }
 
     try {
       final uploadRequest = jsonEncode({
@@ -191,13 +250,11 @@ class SocketManager {
       _socket!.write(uploadRequest + '\n');
       await _socket!.flush();
 
-      //get initial response
       await Future.delayed(Duration(milliseconds: 200));
 
       _socket!.add(fileBytes);
       await _socket!.flush();
 
-      // get result
       await Future.delayed(Duration(milliseconds: 500));
 
       print('Song upload completed: $filename');
@@ -208,7 +265,13 @@ class SocketManager {
     }
   }
 
-  
+  void dispose() {
+    _reconnectTimer?.cancel();
+    _socket?.destroy();
+    _socket = null;
+    _isConnected = false;
+    _isReconnecting = false;
+  }
 
   Socket? get socket => _socket;
   bool get isConnected => _isConnected;

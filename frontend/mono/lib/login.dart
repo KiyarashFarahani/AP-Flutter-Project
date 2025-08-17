@@ -49,11 +49,16 @@ class _LoginState extends State<Login> {
 
       try {
         if (!_socketManager.isConnected) {
-          setState(() {
-            _errorMessage = "Not connected to server. Please check your connection.";
-            _isLoading = false;
-          });
-          return;
+          print('Not connected to server, attempting to reconnect...');
+          await _socketManager.connect();
+
+          if (!_socketManager.isConnected) {
+            setState(() {
+              _errorMessage = "Failed to connect to server. Please check your connection and try again.";
+              _isLoading = false;
+            });
+            return;
+          }
         }
 
         final loginRequest = {
