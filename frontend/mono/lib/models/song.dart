@@ -1,5 +1,6 @@
 class Song {
   final int? id;
+  String? filename;
   String? title;
   String? artist;
   String? cover;
@@ -19,6 +20,7 @@ class Song {
 
   Song({
     this.id,
+    this.filename,
     this.title,
     this.artist,
     this.cover,

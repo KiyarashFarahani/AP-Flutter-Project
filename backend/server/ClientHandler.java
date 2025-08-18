@@ -126,6 +126,7 @@ public class ClientHandler implements Runnable {
 
 
                                 JsonObject songObject = new JsonObject();
+                                songObject.addProperty("filename", f.getName());
                                 songObject.addProperty("title", title);
                                 songObject.addProperty("artist", artist);
                                 //songObject.addProperty("cover", base64Cover);

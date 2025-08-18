@@ -3,7 +3,9 @@ import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:ui';
+import 'dart:io';
 import 'package:marquee/marquee.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:mono/services/socket_manager.dart';
 import 'package:mono/models/song.dart';
 
@@ -59,9 +61,10 @@ class _SongExplorerState extends State<SongExplorer> {
           songsJsonList
               .map(
                 (songsJson) => Song(
-                  title: songsJson['title'] ?? "Unknown",
-                  artist: songsJson['artist'] ?? "Unknown",
-                  cover: songsJson['cover'] ?? "",
+                  filename: songsJson['filename'] ?? 'Unknown',
+                  title: songsJson['title'] ?? 'Unknown',
+                  artist: songsJson['artist'] ?? 'Unknown',
+                  cover: songsJson['cover'] ?? '',
                 ),
               )
               .toList();
@@ -86,6 +89,32 @@ class _SongExplorerState extends State<SongExplorer> {
       print("Error: Received empty bytes");
     }
   }
+
+  Future<void> _downloadSong(String filename) async {
+  final request = jsonEncode({
+    "action": "get_song",
+    "data": {"filename": filename},
+  });
+
+  final bytes = await _socketManager.getSongBytes(request);
+
+  if (bytes != null && bytes.isNotEmpty) {
+    final directory = await getExternalStorageDirectory();
+
+    if (directory != null) {
+      final file = File('${directory.path}/$filename');
+
+      await file.writeAsBytes(bytes, flush: true);
+
+      print('Song saved at: ${file.path}');
+    } else {
+      print('Could not get external storage directory');
+    }
+  } else {
+    print('No bytes received');
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +266,7 @@ class _SongExplorerState extends State<SongExplorer> {
                                           ),
                                           onTap: () {
                                             Navigator.pop(context);
-                                            // TODO: implement download method
+                                            _downloadSong(songs[index].filename!);
                                           },
                                         ),
                                       ],
