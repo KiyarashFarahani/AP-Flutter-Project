@@ -1,9 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:mono/models/song.dart';
 import 'package:mono/widgets/circular_icon_button.dart';
 
 class NowPlayingPage extends StatefulWidget {
-  const NowPlayingPage({super.key});
+  const NowPlayingPage({super.key, required Song songTitle});
 
   @override
   State<NowPlayingPage> createState() => _NowPlayingPageState();

@@ -7,6 +7,8 @@ import 'package:mono/services/socket_manager.dart';
 import 'package:mono/models/song.dart';
 import 'package:file_picker/file_picker.dart';
 
+import 'now_playing.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -572,50 +574,10 @@ class _HomePageState extends State<HomePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => Scaffold(
-                                        backgroundColor: colorScheme.surface,
-                                        appBar: AppBar(
-                                          backgroundColor: Colors.transparent,
-                                          elevation: 0,
-                                          title: Text(
-                                            songs[index].title ?? 'Unknown Title',
-                                            style: textTheme.headlineSmall?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: colorScheme.onSurface,
-                                            ),
-                                          ),
-                                        ),
-                                        body: Center(
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.music_note,
-                                                size: 80,
-                                                color: colorScheme.primary,
-                                              ),
-                                              const SizedBox(height: 16),
-                                              Text(
-                                                '🎵 Play Page Placeholder',
-                                                style: textTheme.headlineSmall?.copyWith(
-                                                  color: colorScheme.onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                /* onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
                                       builder: (_) => NowPlayingPage(songTitle: songs[index]),
                                     ),
                                   );
-                                 }, */ //TODO: For later use...
+                                 },
                               ),
                             ),
                           ),
