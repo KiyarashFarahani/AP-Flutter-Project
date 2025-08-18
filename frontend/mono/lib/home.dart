@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:mono/services/socket_manager.dart';
+import 'package:mono/models/song.dart';
 import 'package:file_picker/file_picker.dart';
 
 
@@ -17,7 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   final _socketManager = SocketManager();
-  List<String> songs = [];
+  List<Song> songs = [];
   String filter = 'Date';
   bool isLoading = true;
 
@@ -77,7 +78,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadSongs() async {
     print('Starting to load songs...');
     try {
-      final List<String> list;
+      final List<Song> list;
       final listSongsRequest = jsonEncode({"action": "list_songs"});
       print('Sending request: $listSongsRequest');
       
@@ -96,9 +97,8 @@ class _HomePageState extends State<HomePage> {
         print('Data list: $dataList');
         
         list = dataList
-            .map<String>((item) => (item as Map<String, dynamic>)['title'] as String)
+            .map<Song>((item) => Song.fromJson(item as Map<String, dynamic>))
             .toList();
-        print('Extracted song titles: $list');
       } catch (e) {
         print('JSON Parse Error: $e\nResponse: $response');
         throw Exception('Invalid server response');
@@ -175,7 +175,7 @@ class _HomePageState extends State<HomePage> {
       if (filter == 'Date') {
         songs = songs.reversed.toList();
       } else {
-        songs.sort();
+        songs.sort((a, b) => (a.title ?? '').compareTo(b.title ?? ''));
       }
     });
   }
@@ -543,14 +543,14 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 title: Text(
-                                  songs[index],
+                                  songs[index].title ?? 'Unknown Title',
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: colorScheme.onSurface,
                                   ),
                                 ),
                                 subtitle: Text(
-                                  'Tap to play',
+                                  songs[index].artist ?? 'Unknown Artist',
                                   style: textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
@@ -578,7 +578,7 @@ class _HomePageState extends State<HomePage> {
                                           backgroundColor: Colors.transparent,
                                           elevation: 0,
                                           title: Text(
-                                            songs[index],
+                                            songs[index].title ?? 'Unknown Title',
                                             style: textTheme.headlineSmall?.copyWith(
                                               fontWeight: FontWeight.bold,
                                               color: colorScheme.onSurface,
