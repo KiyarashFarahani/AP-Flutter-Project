@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "id": 1,
+    "username": "ramtin@gmail.com",
+    "password": "Ram1234567",
+    "sharePermission": true
+  }
+]

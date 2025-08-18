@@ -14,7 +14,6 @@ public class User {
     private String email;
     private Theme theme;
     private boolean sharePermission;
-    private boolean doesExist;
     private String profileImageUrl;
     private Set<Song> likedSongs;
     private Set<Playlist> playlists;
@@ -30,7 +29,6 @@ public class User {
         this.password = password;
         this.theme = Theme.LIGHT;
         sharePermission = true;
-        doesExist = true;
         likedSongs = new HashSet<>();
         playlists = new HashSet<>();
         allSongs = new HashSet<>();
@@ -132,12 +130,6 @@ public class User {
 
     public void enableSharePermission() {
         sharePermission = true;
-    }
-
-    public void deleteAccount(String userName, String password) {
-        if(userName.equals(this.username)&& password.equals(this.password)) {
-            doesExist = false;
-        }
     }
 
     public Set<Playlist> getPlaylists() {

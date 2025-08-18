@@ -1,17 +1,82 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:mono/models/song.dart';
+import 'package:mono/services/socket_manager.dart';
 import 'package:mono/widgets/circular_icon_button.dart';
 
+import 'models/song.dart';
+
 class NowPlayingPage extends StatefulWidget {
-  const NowPlayingPage({super.key, required Song songTitle});
+  const NowPlayingPage(this.song ,{super.key});
+  final Song song;
 
   @override
   State<NowPlayingPage> createState() => _NowPlayingPageState();
 }
 
 class _NowPlayingPageState extends State<NowPlayingPage> {
+  late final _audioPlayer;
+  late final _socketManager;
+  Duration _currentPosition = Duration.zero;
+  Duration _totalDuration = Duration.zero;
+  bool isPlaying = true;
   bool isLiked = false; // For animated favorite button
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
+    _socketManager = SocketManager();
+    _playSong(widget.song.filename!);
+    // Audio Player listening for state changes
+    _audioPlayer.onPositionChanged.listen((position) {
+      setState(() {
+        _currentPosition = position;
+      });
+    });
+
+    _audioPlayer.onDurationChanged.listen((duration) {
+      setState(() {
+        _totalDuration = duration;
+      });
+    });
+
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      setState(() {
+        isPlaying = state == PlayerState.playing;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _playSong(String filename) async {
+    final request = jsonEncode({
+      "action": "get_song",
+      "data": {"filename": filename},
+    });
+    final bytes = await _socketManager.getSongBytes(request);
+
+    if (bytes != null && bytes.isNotEmpty) {
+      await _audioPlayer.play(BytesSource(bytes));
+    } else {
+      print("Error: Received empty bytes");
+    }
+  }
+
+  Future<void> _togglePlayButton() async {
+    if(isPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.resume();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +157,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
 
                   // Song Title & Artist
                   Text(
-                    "Song Name",
+                    widget.song.title ?? "Unknown Song",
                     style: textTheme.headlineSmall?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
@@ -101,7 +166,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "Artist Name",
+                    widget.song.artist ?? "Unknown Artist",
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -186,8 +251,13 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                           foregroundColor: colorScheme.onPrimary,
                           elevation: 6,
                         ),
-                        onPressed: () {},
-                        child: const Icon(Icons.play_arrow, size: 32),
+                        onPressed: () {
+                          setState(() {
+                            _togglePlayButton();
+                          });
+                        },
+                        child: isPlaying ? const Icon(Icons.pause, size: 32,)
+                            : const Icon(Icons.play_arrow, size: 32),
                       ),
                       const SizedBox(width: 16),
                       IconButton(

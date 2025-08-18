@@ -9,6 +9,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:mono/services/socket_manager.dart';
 import 'package:mono/models/song.dart';
 
+import 'now_playing.dart';
+
 class SongExplorer extends StatefulWidget {
   const SongExplorer({super.key});
   @override
@@ -73,20 +75,6 @@ class _SongExplorerState extends State<SongExplorer> {
     } catch (e) {
       print('JSON Parse Error: $e\nResponse: $response');
       throw Exception('Invalid server response');
-    }
-  }
-
-  Future<void> _playSong(String filename) async {
-    final request = jsonEncode({
-      "action": "get_song",
-      "data": {"filename": filename},
-    });
-    final bytes = await _socketManager.getSongBytes(request);
-
-    if (bytes != null && bytes.isNotEmpty) {
-      await _player.play(BytesSource(bytes));
-    } else {
-      print("Error: Received empty bytes");
     }
   }
 
@@ -191,7 +179,16 @@ class _SongExplorerState extends State<SongExplorer> {
                           itemCount: songs.length,
                           itemBuilder: (context, index) {
                             return InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => NowPlayingPage(
+                                      songs[index],
+                                    ),
+                                  ),
+                                );
+                              },
                               onLongPress: () {
                                 showModalBottomSheet(
                                   context: context,
