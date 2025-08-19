@@ -1,13 +1,16 @@
 package backend.controllers;
 
 import backend.dto.Response;
+import backend.model.Song;
 import backend.model.Theme;
 import backend.model.User;
 import backend.utils.JsonDatabase;
 import backend.utils.TokenManager;
 
-import java.util.*;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class UserController {
 
@@ -165,5 +168,51 @@ public class UserController {
         userInfo.put("share_permission", user.isSharePermission());
         userInfo.put("profile_image_url", user.getProfileImageUrl());
         return new Response<>(200, userInfo, "User information retrieved successfully");
+    }
+
+    public Response<?> addSongToUser(String token, int songId) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null)
+            return new Response<>(401, null, "Invalid token");
+
+        if (JsonDatabase.userHasSong(userId, songId))
+            return new Response<>(409, null, "Song already exists in user's library");
+
+        JsonDatabase.addSongToUser(userId, songId);
+
+        return new Response<>(200, null, "Song added to user's library successfully");
+    }
+
+    public Response<?> removeSongFromUser(String token, int songId) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null)
+            return new Response<>(401, null, "Invalid token");
+
+        if (!JsonDatabase.userHasSong(userId, songId))
+            return new Response<>(404, null, "Song not found in user's library");
+
+        JsonDatabase.removeSongFromUser(userId, songId);
+
+        return new Response<>(200, null, "Song removed from user's library successfully");
+    }
+
+    public Response<?> getUserSongs(String token) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null)
+            return new Response<>(401, null, "Invalid token");
+
+        List<Song> userSongs = JsonDatabase.getUserSongs(userId);
+
+        return new Response<>(200, userSongs, "User songs retrieved successfully");
+    }
+
+    public Response<?> clearUserSongs(String token) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null) {
+            return new Response<>(401, null, "Invalid token");
+        }
+
+        JsonDatabase.clearUserSongs(userId);
+        return new Response<>(200, null, "User songs cleared successfully");
     }
 }
