@@ -132,6 +132,18 @@ public class JsonDatabase {
         return null;
     }
 
+    public static Song findSongByFilename(String filename) {
+        for(Song song : songs) {
+            if(song.getFilePath() != null) {
+                if(song.getFilePath().startsWith("data/musics/")) {
+                    String cleanPath = song.getFilePath().substring("data/musics/".length());
+                    if(cleanPath.equals(filename)) return song;
+                }
+            }
+        }
+        return null;
+    }
+
     public static Playlist findPlaylistById(int playlistId) {
         for(Playlist playlist : playlists) {
             if(playlist.getId()==playlistId) return playlist;
@@ -260,7 +272,7 @@ public class JsonDatabase {
     public static synchronized void addSongToUser(int userId, int songId) {
         User user = findUserById(userId);
         Song song = findSongById(songId);
-        
+
         if (user != null && song != null) {
             user.addSong(song);
             saveUsers();
