@@ -178,6 +178,11 @@ public class UserController {
         if (JsonDatabase.userHasSong(userId, songId))
             return new Response<>(409, null, "Song already exists in user's library");
 
+        Song song = JsonDatabase.findSongById(songId);
+        if (song == null) {
+            return new Response<>(404, null, "Song not found");
+        }
+
         JsonDatabase.addSongToUser(userId, songId);
 
         return new Response<>(200, null, "Song added to user's library successfully");
@@ -214,5 +219,23 @@ public class UserController {
 
         JsonDatabase.clearUserSongs(userId);
         return new Response<>(200, null, "User songs cleared successfully");
+    }
+
+    public Response<?> validateToken(String token) {
+        Integer userId = TokenManager.validateToken(token);
+        if (userId == null) {
+            return new Response<>(401, null, "Invalid token");
+        }
+        User user = JsonDatabase.findUserById(userId);
+        if (user == null) {
+            return new Response<>(404, null, "User not found");
+        }
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("user_id", user.getId());
+        userInfo.put("username", user.getUsername());
+        userInfo.put("theme", user.getTheme());
+        userInfo.put("share_permission", user.isSharePermission());
+        userInfo.put("profile_image_url", user.getProfileImageUrl());
+        return new Response<>(200, userInfo, "Token is valid");
     }
 }
