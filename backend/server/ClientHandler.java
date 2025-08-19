@@ -4,6 +4,8 @@ import backend.controllers.SongController;
 import backend.controllers.UserController;
 import backend.dto.*;
 
+import backend.model.Song;
+import backend.utils.JsonDatabase;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -88,6 +90,9 @@ public class ClientHandler implements Runnable {
                     case "log_out" -> {
                         response = userController.logout(token);
                     }
+                    case "validate_token" -> {
+                        response = userController.validateToken(token);
+                    }
                     case "list_songs" -> {
                         File dir = new File(FileRequestHandler.MUSIC_DIR);
                         File[] files = dir.listFiles((d, name) -> name.endsWith(".mp3"));
@@ -147,6 +152,18 @@ public class ClientHandler implements Runnable {
                         response = new Response<>(200, outData, "File info ready");
                        requestHandler = new FileRequestHandler(filename, socket.getOutputStream(), socket);
 
+                    }
+                    case "get_song_id_by_filename" -> {
+                        String filename = gson.fromJson(gson.toJson(request.getData()), String.class);
+                        Song song = JsonDatabase.findSongByFilename(filename);
+                        if (song != null) {
+                            Map<String, Object> outData = new HashMap<>();
+                            outData.put("song_id", song.getId());
+                            outData.put("filename", song.getFilePath());
+                            response = new Response<>(200, outData, "Song ID found");
+                        } else {
+                            response = new Response<>(404, null, "Song not found");
+                        }
                     }
                     case "delete_account" -> {
                         DeleteAccountData data = gson.fromJson(gson.toJson(request.getData()), DeleteAccountData.class);
