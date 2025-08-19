@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:marquee/marquee.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:mono/services/socket_manager.dart';
+import 'package:mono/services/token_storage.dart';
 import 'package:mono/models/song.dart';
 
 import 'now_playing.dart';
@@ -102,6 +103,89 @@ class _SongExplorerState extends State<SongExplorer> {
     print('No bytes received');
   }
 }
+
+  Future<void> _addSongToAccount(String filename) async {
+    try {
+      final getSongIdRequest = jsonEncode({
+        "action": "get_song_id_by_filename",
+        "data": filename,
+      });
+
+      final songIdResponse = await _socketManager.sendWithResponse(
+        getSongIdRequest,
+        timeout: Duration(seconds: 10),
+      );
+
+      if (songIdResponse == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to get song information')),
+        );
+        return;
+      }
+
+      final songIdData = jsonDecode(songIdResponse);
+      if (songIdData['status'] != 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Song not found: ${songIdData['message']}')),
+        );
+        return;
+      }
+
+      final songId = songIdData['data']['song_id'] as int;
+
+      final tokenData = await TokenStorage.getToken();
+      if (tokenData == null || tokenData['token'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please login to add songs to your account')),
+        );
+        return;
+      }
+
+      final addSongRequest = jsonEncode({
+        "action": "add_song_to_user",
+        "token": tokenData['token'],
+        "data": {"songId": songId},
+      });
+
+      final addSongResponse = await _socketManager.sendWithResponse(
+        addSongRequest,
+        timeout: Duration(seconds: 10),
+      );
+
+      if (addSongResponse == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to add song to account')),
+        );
+        return;
+      }
+
+      final addSongData = jsonDecode(addSongResponse);
+      if (addSongData['status'] == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Song added to your account successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        final errorMessage = addSongData['message'] as String? ?? 'Unknown error';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add song: $errorMessage'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error adding song to account: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
 
   @override
@@ -216,9 +300,9 @@ class _SongExplorerState extends State<SongExplorer> {
                                             style: textTheme.titleMedium
                                                 ?.copyWith(color: Colors.white),
                                           ),
-                                          onTap: () {
+                                          onTap: () async {
                                             Navigator.pop(context);
-                                            // TODO: implement ability of adding song to account(home page)
+                                            await _addSongToAccount(songs[index].filename!);
                                           },
                                         ),
                                         ListTile(
