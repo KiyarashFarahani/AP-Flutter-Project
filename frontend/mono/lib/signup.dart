@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mono/services/socket_manager.dart';
 import 'package:mono/main_page.dart';
+import 'package:mono/services/token_storage.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -91,6 +92,8 @@ class _SignUpState extends State<SignUp> {
           final userId = response['data']['user_id'];
 
           print('Sign up successful. Token: $token, User ID: $userId');
+
+          await TokenStorage.saveToken(token, userId);
           
           if (mounted) {
             setState(() {

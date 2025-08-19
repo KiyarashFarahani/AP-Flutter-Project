@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:mono/services/socket_manager.dart';
 import 'package:mono/models/song.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:mono/services/token_storage.dart';
 
 import 'now_playing.dart';
 
@@ -237,7 +238,7 @@ class _HomePageState extends State<HomePage> {
             final success = await _socketManager.uploadSong(
               file.name,
               bytes,
-              'user_token', // TODO: Get user token
+              await _getStoredToken(),
             );
 
             Navigator.pop(context);
@@ -360,6 +361,11 @@ class _HomePageState extends State<HomePage> {
 
     await _loadSongs();
     print('Refresh and reconnect process completed');
+  }
+
+  Future<String> _getStoredToken() async {
+    final tokenData = await TokenStorage.getToken();
+    return tokenData?['token'] ?? '';
   }
 
   @override

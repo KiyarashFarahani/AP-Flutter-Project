@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mono/login.dart';
+import 'package:mono/splash_screen.dart';
 import 'package:mono/theme.dart';
 import 'package:mono/util.dart';
 
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mono',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-      home: const Login(),
+      home: const SplashScreen(),
     );
   }
 }
