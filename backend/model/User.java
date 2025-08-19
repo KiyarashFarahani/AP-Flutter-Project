@@ -20,7 +20,14 @@ public class User {
     private Set<Song> allSongs;
     private Map<Song, LocalTime> downloadedSongs;
 
-    public User() {}
+    public User() {
+        this.theme = Theme.DARK;
+        this.sharePermission = true;
+        this.likedSongs = new HashSet<>();
+        this.playlists = new HashSet<>();
+        this.allSongs = new HashSet<>();
+        this.downloadedSongs = new HashMap<>();
+    }
 
     public User(String userName, String password) throws InvalidPasswordException, InvalidUsernameException {
         validateUsername(userName);
@@ -136,14 +143,34 @@ public class User {
         return playlists;
     }
 
+    public void setPlaylists(Set<Playlist> playlists) {
+        this.playlists = playlists;
+    }
+
     public Set<Song> getSongs() {
         return allSongs;
+    }
+
+    public void setAllSongs(Set<Song> allSongs) {
+        this.allSongs = allSongs;
+    }
+
+    public Map<Song, LocalTime> getDownloadedSongs() {
+        return downloadedSongs;
+    }
+
+    public void setDownloadedSongs(Map<Song, LocalTime> downloadedSongs) {
+        this.downloadedSongs = downloadedSongs;
     }
 
     public Theme getTheme() {return theme;}
 
     public Set<Song> getLikedSongs() {
         return likedSongs;
+    }
+
+    public void setLikedSongs(Set<Song> likedSongs) {
+        this.likedSongs = likedSongs;
     }
 
     public String getEmail() {
