@@ -19,6 +19,7 @@ import org.jaudiotagger.tag.images.Artwork;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Base64;
@@ -189,6 +190,20 @@ public class ClientHandler implements Runnable {
                         CreateNewPlaylistData data = gson.fromJson(gson.toJson(request.getData()),
                                 CreateNewPlaylistData.class);
                         response = songController.createPlaylist(token, data.getPlayListName());
+                    }
+                    case "add_song_to_user" -> {
+                        AddSongToUserData data = gson.fromJson(gson.toJson(request.getData()), AddSongToUserData.class);
+                        response = userController.addSongToUser(token, data.getSongId());
+                    }
+                    case "remove_song_from_user" -> {
+                        RemoveSongFromUserData data = gson.fromJson(gson.toJson(request.getData()), RemoveSongFromUserData.class);
+                        response = userController.removeSongFromUser(token, data.getSongId());
+                    }
+                    case "get_user_songs" -> {
+                        response = userController.getUserSongs(token);
+                    }
+                    case "clear_user_songs" -> {
+                        response = userController.clearUserSongs(token);
                     }
                     case "upload_song" -> {
                         UploadSongData data = gson.fromJson(gson.toJson(request.getData()), UploadSongData.class);
