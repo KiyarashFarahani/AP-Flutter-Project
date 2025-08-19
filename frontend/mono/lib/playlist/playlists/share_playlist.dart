@@ -20,7 +20,7 @@ class _SharePlaylistState extends State<SharePlaylist> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
-      backgroundColor: colorScheme.secondaryContainer,
+      backgroundColor: colorScheme.primaryContainer,
       contentPadding: EdgeInsets.fromLTRB(24, 15, 24, 10),
       title: Text('Share playlist',
       style: TextStyle(color: colorScheme.onSecondaryContainer),
@@ -40,8 +40,8 @@ class _SharePlaylistState extends State<SharePlaylist> {
       actions: [
         TextButton(
           style: TextButton.styleFrom(
-            backgroundColor: colorScheme.secondaryFixed,
-            foregroundColor: colorScheme.onSurfaceVariant,
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onSecondary,
           ),
           onPressed: () {
             Navigator.pop(context);

@@ -54,11 +54,11 @@ class _NewPlaylistState extends State<NewPlaylist> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
-      backgroundColor: colorScheme.secondaryContainer,
+      backgroundColor: colorScheme.primaryContainer,
       contentPadding: EdgeInsets.fromLTRB(24, 15, 24, 10),
       title: Text(
         'Add new playlist',
-        style: TextStyle(color: colorScheme.onSecondaryContainer),
+        style: TextStyle(color: colorScheme.onPrimaryContainer),
       ),
       content: SizedBox(
         width: 400,
@@ -77,8 +77,8 @@ class _NewPlaylistState extends State<NewPlaylist> {
       actions: [
         TextButton(
           style: TextButton.styleFrom(
-            backgroundColor: colorScheme.secondaryFixed,
-            foregroundColor: colorScheme.onSurfaceVariant,
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onSecondary,
           ),
           onPressed: () {
             Navigator.pop(context);

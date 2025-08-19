@@ -19,10 +19,16 @@ enum AppPage { playlists, songsInPlaylists, home }
 
 class _PlaylistsState extends State<Playlists> {
   final List<Playlist> _playlists = [
-    Playlist(title: 'fav', songs: [Song(title: 'Blind Trust', artist: 'mamad')]),
+    Playlist(
+      title: 'fav',
+      songs: [Song(title: 'Blind Trust', artist: 'mamad')],
+    ),
     Playlist(
       title: 'test',
-      songs: [Song(title: '1', artist: 'mamad1'), Song(title: '2', artist: 'mamad2')],
+      songs: [
+        Song(title: '1', artist: 'mamad1'),
+        Song(title: '2', artist: 'mamad2'),
+      ],
     ),
   ];
 
@@ -61,7 +67,7 @@ class _PlaylistsState extends State<Playlists> {
     );
   }
 
-  void _addSongToPlaylist (Playlist playlist, Song song) {
+  void _addSongToPlaylist(Playlist playlist, Song song) {
     setState(() {
       for (Playlist p in _playlists) {
         if (p == playlist) {
@@ -132,9 +138,9 @@ class _PlaylistsState extends State<Playlists> {
                                     MaterialPageRoute(
                                       builder:
                                           (context) => SongsList(
-                                            addSongToPlaylist: _addSongToPlaylist,
-                                            playlist:
-                                                _playlists[index],
+                                            addSongToPlaylist:
+                                                _addSongToPlaylist,
+                                            playlist: _playlists[index],
                                             songs: _playlists[index].songs,
                                           ),
                                     ),
@@ -155,23 +161,24 @@ class _PlaylistsState extends State<Playlists> {
                                           children: [
                                             Text(
                                               _playlists[index].title,
-                                              style: TextStyle(
-                                                color:
-                                                    colorScheme
-                                                        .onPrimaryContainer,
-                                                fontSize: 20,
-                                              ),
+                                              style: textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        colorScheme.onSurface,
+                                                  ),
                                             ),
                                             Text(
-                                              _playlists[index].songs.length == 1
+                                              _playlists[index].songs.length ==
+                                                      1
                                                   ? '${_playlists[index].songs.length} song'
                                                   : '${_playlists[index].songs.length} songs',
-                                              style: TextStyle(
-                                                color:
-                                                    colorScheme
-                                                        .onPrimaryContainer,
-                                                fontSize: 15,
-                                              ),
+                                              style: textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        colorScheme
+                                                            .onSurfaceVariant,
+                                                  ),
                                             ),
                                           ],
                                         ),
