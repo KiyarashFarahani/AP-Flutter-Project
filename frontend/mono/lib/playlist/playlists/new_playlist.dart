@@ -23,7 +23,7 @@ class _NewPlaylistState extends State<NewPlaylist> {
 
   void _submitPlaylist() {
     widget.addPlaylist(
-      Playlist(title: _titleController.text, numOfSongs: 0, songs: []),
+      Playlist(title: _titleController.text, songs: []),
     );
     Navigator.pop(context);
   }

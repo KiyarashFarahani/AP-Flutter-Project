@@ -34,7 +34,7 @@ class SongItem extends StatelessWidget {
                         ),
                       ),
                       subtitle: Text(
-                        'Tap to play',
+                        song.artist!,
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),

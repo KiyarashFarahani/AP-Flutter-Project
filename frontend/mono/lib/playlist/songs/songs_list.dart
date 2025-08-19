@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:mono/home.dart';
 import 'dart:ui';
 
 import 'package:mono/models/song.dart';
+import 'package:mono/models/playlist.dart';
 import 'package:mono/playlist/songs/song_item.dart';
 
 
 
 class SongsList extends StatefulWidget {
-  const SongsList({required this.playlistTitle, required this.songs, super.key});
+  const SongsList({required this.addSongToPlaylist,required this.playlist, required this.songs, super.key});
 
-  final String playlistTitle;
+  final Function(Playlist, Song) addSongToPlaylist;
+  final Playlist playlist;
   final List<Song> songs;
   @override
   State<StatefulWidget> createState() {
@@ -18,11 +21,6 @@ class SongsList extends StatefulWidget {
 }
 
 class _SongsListState extends State<SongsList> {
-  _addSong(Song song) {
-    setState(() {
-      widget.songs.add(song);
-    });
-  }
 
   _removeSong(Song song) {
     setState(() {
@@ -60,7 +58,7 @@ class _SongsListState extends State<SongsList> {
                 backgroundColor: Colors.transparent,
                 foregroundColor: colorScheme.onPrimary,
                 title: Text(
-                  widget.playlistTitle,
+                  widget.playlist.title,
                   style: textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -85,7 +83,17 @@ class _SongsListState extends State<SongsList> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+            final selectedSong = await Navigator.push (
+              context,
+              MaterialPageRoute(builder: (context) => HomePage(selectMode: true,)),
+            );
+            if (selectedSong != null) {
+              setState(() {
+                widget.addSongToPlaylist(widget.playlist, selectedSong);
+              });
+            }
+        },
         backgroundColor: colorScheme.primaryContainer,
         elevation: 8,
         child: Icon(Icons.add, size: 28),

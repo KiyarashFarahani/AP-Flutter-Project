@@ -13,14 +13,15 @@ import 'song_explorer.dart';
 import 'main_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key,  this.selectMode = false}) : super(key: key);
+  final bool selectMode;
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-
+  
   final _socketManager = SocketManager();
   List<Song> songs = [];
   String filter = 'Date';
@@ -581,12 +582,17 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 onTap: () {
-                                  Navigator.push(
+                                  if (widget.selectMode) {
+                                    Navigator.pop(context, songs[index]);
+                                  } else {
+                                      Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => NowPlayingPage(songs[index]),
                                     ),
                                   );
+                                  }
+                                  
                                  },
                               ),
                             ),

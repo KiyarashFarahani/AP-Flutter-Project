@@ -4,9 +4,8 @@ import 'dart:ui';
 import 'package:mono/models/playlist.dart';
 import 'package:mono/models/song.dart';
 import 'package:mono/playlist/playlists/new_playlist.dart';
-import 'package:mono/playlist/playlists/playlists_list.dart';
-
-
+import 'package:mono/playlist/songs/songs_list.dart';
+import 'package:mono/playlist/playlists/share_playlist.dart';
 
 class Playlists extends StatefulWidget {
   const Playlists({super.key});
@@ -20,22 +19,12 @@ enum AppPage { playlists, songsInPlaylists, home }
 
 class _PlaylistsState extends State<Playlists> {
   final List<Playlist> _playlists = [
-    Playlist(
-      title: 'fav',
-      numOfSongs: 1,
-      songs: [Song(title: 'Blind Trust')],
-    ),
+    Playlist(title: 'fav', songs: [Song(title: 'Blind Trust', artist: 'mamad')]),
     Playlist(
       title: 'test',
-      numOfSongs: 2,
-      songs: [
-        Song(title: '1'),
-        Song(title: '2'),
-      ],
+      songs: [Song(title: '1', artist: 'mamad1'), Song(title: '2', artist: 'mamad2')],
     ),
   ];
-
-  
 
   void _addPlaylist(Playlist playlist) {
     setState(() {
@@ -66,7 +55,21 @@ class _PlaylistsState extends State<Playlists> {
   }
 
   void _addNewPlaylis() {
-    showDialog(context: context, builder: (ctx) => NewPlaylist(_addPlaylist, playlists: _playlists,));
+    showDialog(
+      context: context,
+      builder: (ctx) => NewPlaylist(_addPlaylist, playlists: _playlists),
+    );
+  }
+
+  void _addSongToPlaylist (Playlist playlist, Song song) {
+    setState(() {
+      for (Playlist p in _playlists) {
+        if (p == playlist) {
+          p.songs.add(song);
+          return;
+        }
+      }
+    });
   }
 
   @override
@@ -106,8 +109,92 @@ class _PlaylistsState extends State<Playlists> {
                   ),
                 ),
               ),
-
-              Expanded(child: PlaylistsList(_playlists, _removePlaylist)),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _playlists.length,
+                  itemBuilder:
+                      (context, index) => Dismissible(
+                        background: Container(color: colorScheme.error),
+                        key: ValueKey(_playlists[index]),
+                        onDismissed:
+                            (direction) => _removePlaylist(_playlists[index]),
+                        child: Center(
+                          child: SizedBox(
+                            width: 390,
+                            height: 95,
+                            child: Card(
+                              color: colorScheme.primaryContainer,
+                              margin: EdgeInsets.symmetric(vertical: 6),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => SongsList(
+                                            addSongToPlaylist: _addSongToPlaylist,
+                                            playlist:
+                                                _playlists[index],
+                                            songs: _playlists[index].songs,
+                                          ),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              _playlists[index].title,
+                                              style: TextStyle(
+                                                color:
+                                                    colorScheme
+                                                        .onPrimaryContainer,
+                                                fontSize: 20,
+                                              ),
+                                            ),
+                                            Text(
+                                              _playlists[index].songs.length == 1
+                                                  ? '${_playlists[index].songs.length} song'
+                                                  : '${_playlists[index].songs.length} songs',
+                                              style: TextStyle(
+                                                color:
+                                                    colorScheme
+                                                        .onPrimaryContainer,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (ctx) => SharePlaylist(),
+                                          );
+                                        },
+                                        icon: Icon(Icons.share),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                ),
+              ),
             ],
           ),
         ],

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:ui';
@@ -14,13 +13,14 @@ import 'now_playing.dart';
 
 class SongExplorer extends StatefulWidget {
   const SongExplorer({super.key});
-  @override
-  _SongExplorerState createState() => _SongExplorerState();
+@override
+  State<StatefulWidget> createState() {
+    return _SongExplorerState();
+  }
 }
 
 class _SongExplorerState extends State<SongExplorer> {
   final _socketManager = SocketManager();
-  final _player = AudioPlayer();
   List<Song> songs = [];
   late List<Song> filteredSongs;
   final TextEditingController _searchController = TextEditingController();
