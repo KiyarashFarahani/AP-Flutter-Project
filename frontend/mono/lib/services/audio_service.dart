@@ -1,9 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:mono/services/socket_manager.dart';
 import 'dart:convert';
 
-class AudioService extends ChangeNotifier {
+class AudioService {
   static final AudioService _instance = AudioService._internal();
   factory AudioService() => _instance;
   AudioService._internal();
@@ -26,64 +25,29 @@ class AudioService extends ChangeNotifier {
   Duration get duration => _duration;
   AudioPlayer get player => _player;
 
-  @override
   void dispose() {
     _player.dispose();
-    super.dispose();
-  }
-
-  // Initialize audio player listeners
-  void initialize() {
-    _player.onPlayerStateChanged.listen((state) {
-      _isPlaying = state == PlayerState.playing;
-      notifyListeners();
-    });
-
-    _player.onPositionChanged.listen((pos) {
-      _position = pos;
-      notifyListeners();
-    });
-
-    _player.onDurationChanged.listen((dur) {
-      _duration = dur;
-      notifyListeners();
-    });
-
-    _player.onPlayerComplete.listen((_) {
-      _isPlaying = false;
-      _position = Duration.zero;
-      notifyListeners();
-    });
   }
 
   // Play a song by title
-  Future<void> playSong(String songTitle, {String? artist}) async {
+  Future<void> playSong(String filename) async {
     try {
-      // Stop current playback
       await _player.stop();
-
-      // Update current song info
-      _currentSongTitle = songTitle;
-      _currentSongArtist = artist;
       _position = Duration.zero;
       _isPlaying = false;
-      notifyListeners();
 
-      // Get song bytes from server
       final request = jsonEncode({
         "action": "get_song",
-        "data": {"filename": songTitle},
+        "data": {"filename": filename},
       });
 
       final bytes = await _socketManager.getSongBytes(request);
 
       if (bytes != null && bytes.isNotEmpty) {
-        // Play the song
         await _player.play(BytesSource(bytes));
         _isPlaying = true;
-        notifyListeners();
       } else {
-        print("Error: Received empty bytes for song: $songTitle");
+        print("Error: Received empty bytes for song: $filename");
       }
     } catch (e) {
       print("Error playing song: $e");
@@ -92,13 +56,12 @@ class AudioService extends ChangeNotifier {
 
   // Play/pause toggle
   Future<void> togglePlayPause() async {
-    if (_currentSongTitle == null) return;
-
     if (_isPlaying) {
       await _player.pause();
     } else {
       await _player.resume();
     }
+    _isPlaying = !_isPlaying;
   }
 
   // Pause playback
@@ -116,25 +79,17 @@ class AudioService extends ChangeNotifier {
     await _player.stop();
     _isPlaying = false;
     _position = Duration.zero;
-    _currentSongTitle = null;
-    _currentSongArtist = null;
-    notifyListeners();
+    _currentSongTitle = "Unknown Song";
+    _currentSongArtist = "Unknown Artist";
   }
 
   // Seek to position
   Future<void> seekTo(Duration position) async {
     await _player.seek(position);
+    _position = position;
   }
 
-  // Skip to next song (placeholder for future implementation)
-  Future<void> nextSong() async {
-    // TODO: Implement next song logic
-    print("Next song functionality not implemented yet");
-  }
-
-  // Skip to previous song (placeholder for future implementation)
-  Future<void> previousSong() async {
-    // TODO: Implement previous song logic
-    print("Previous song functionality not implemented yet");
-  }
+  // Placeholder next/previous
+  Future<void> nextSong() async => print("Next song not implemented");
+  Future<void> previousSong() async => print("Previous song not implemented");
 }

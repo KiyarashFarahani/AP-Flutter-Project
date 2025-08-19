@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:mono/services/audio_service.dart';
 import 'package:mono/services/socket_manager.dart';
 import 'package:mono/widgets/circular_icon_button.dart';
 
@@ -17,65 +18,22 @@ class NowPlayingPage extends StatefulWidget {
 }
 
 class _NowPlayingPageState extends State<NowPlayingPage> {
-  late final _audioPlayer;
+  late final AudioService _audioService;
   late final _socketManager;
-  Duration _currentPosition = Duration.zero;
-  Duration _totalDuration = Duration.zero;
   bool isPlaying = true;
   bool isLiked = false; // For animated favorite button
 
   @override
   void initState() {
     super.initState();
-    _audioPlayer = AudioPlayer();
-    _socketManager = SocketManager();
-    _playSong(widget.song.filename!);
-    // Audio Player listening for state changes
-    _audioPlayer.onPositionChanged.listen((position) {
-      setState(() {
-        _currentPosition = position;
-      });
-    });
-
-    _audioPlayer.onDurationChanged.listen((duration) {
-      setState(() {
-        _totalDuration = duration;
-      });
-    });
-
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      setState(() {
-        isPlaying = state == PlayerState.playing;
-      });
-    });
+    _audioService = AudioService();
+    _audioService.playSong("PREMIERE  Cabaret Nocturne - Blind Trust.mp3");
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    _audioService.dispose();
     super.dispose();
-  }
-
-  Future<void> _playSong(String filename) async {
-    final request = jsonEncode({
-      "action": "get_song",
-      "data": {"filename": filename},
-    });
-    final bytes = await _socketManager.getSongBytes(request);
-
-    if (bytes != null && bytes.isNotEmpty) {
-      await _audioPlayer.play(BytesSource(bytes));
-    } else {
-      print("Error: Received empty bytes");
-    }
-  }
-
-  Future<void> _togglePlayButton() async {
-    if(isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.resume();
-    }
   }
 
   @override
@@ -251,12 +209,11 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                           foregroundColor: colorScheme.onPrimary,
                           elevation: 6,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _togglePlayButton();
-                          });
+                        onPressed: () async {
+                          await _audioService.togglePlayPause();
+                          setState(() {});
                         },
-                        child: isPlaying ? const Icon(Icons.pause, size: 32,)
+                        child: _audioService.isPlaying ? const Icon(Icons.pause, size: 32,)
                             : const Icon(Icons.play_arrow, size: 32),
                       ),
                       const SizedBox(width: 16),
