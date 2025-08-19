@@ -64,7 +64,7 @@ public class ClientHandler implements Runnable {
                 switch (action) {
                     case "sign_up" -> {
                         SignUpData data = gson.fromJson(gson.toJson(request.getData()), SignUpData.class);
-                        response = userController. signUp(data.getUsername(),data.getPassword(),
+                        response = userController.signUp(data.getUsername(),data.getPassword(),
                                 data.getConfirm_password());
                     }
                     case "log_in" -> {

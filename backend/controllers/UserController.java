@@ -22,6 +22,7 @@ public class UserController {
         user.setUserName(username);
         user.setPassword(password);
         user.enableSharePermission();
+        user.setTheme(Theme.LIGHT);
         JsonDatabase.addUser(user);
         String token = TokenManager.generateToken(user.getId());
         Map<String,Object> data = new HashMap<>();
