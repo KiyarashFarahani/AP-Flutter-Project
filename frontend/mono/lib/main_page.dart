@@ -6,12 +6,22 @@ import 'package:mono/song_explorer.dart';
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
+  static _MainPageState? of(BuildContext context) {
+    return context.findAncestorStateOfType<_MainPageState>();
+  }
+
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
   var _currentIndex = 0;
+
+  void switchToTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   final _pages = const [
     HomePage(),

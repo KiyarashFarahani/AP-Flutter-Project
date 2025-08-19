@@ -9,7 +9,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:mono/services/token_storage.dart';
 
 import 'now_playing.dart';
-
+import 'song_explorer.dart';
+import 'main_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -303,7 +304,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showServerSongPicker() {
-    // TODO
+    final mainPage = MainPage.of(context);
+    if (mainPage != null) {
+      mainPage.switchToTab(2); // SongExplorer's index
+    }
   }
 
   Future<void> _refreshAndReconnect() async {
