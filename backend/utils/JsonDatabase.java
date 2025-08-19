@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.HashMap;
 
 public class JsonDatabase {
     private static final String USERS_FILE = "data/users.json";
@@ -40,11 +42,32 @@ public class JsonDatabase {
         try {
             String json = Files.readString(Path.of(USERS_FILE));
             Type type = new TypeToken<List<User>>(){}.getType();
-            return gson.fromJson(json, type);
+            List<User> loadedUsers = gson.fromJson(json, type);
+
+            if (loadedUsers != null)
+                for (User user : loadedUsers)
+                    ensureUserCollectionsInitialized(user);
+
+            
+            return loadedUsers;
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
+    }
+
+    private static void ensureUserCollectionsInitialized(User user) {
+        if (user.getLikedSongs() == null)
+            user.setLikedSongs(new HashSet<>());
+
+        if (user.getPlaylists() == null)
+            user.setPlaylists(new HashSet<>());
+
+        if (user.getSongs() == null)
+            user.setAllSongs(new HashSet<>());
+
+        if (user.getDownloadedSongs() == null)
+            user.setDownloadedSongs(new HashMap<>());
     }
 
     public static void saveUsers() {
@@ -197,6 +220,15 @@ public class JsonDatabase {
         saveSongs();
     }
 
+    public static synchronized void resetSongsDatabase() {
+        songs.clear();
+        saveSongs();
+    }
+
+    public static synchronized void reloadSongs() {
+        songs = loadSongs();
+    }
+
     public static synchronized boolean deleteSong(Song song) {
         boolean result = songs.removeIf(s -> s.equals(song));
         saveSongs();
@@ -223,5 +255,53 @@ public class JsonDatabase {
     public static synchronized void deleteAllAdmins() {
         admins.clear();
         saveAdmins();
+    }
+
+    public static synchronized void addSongToUser(int userId, int songId) {
+        User user = findUserById(userId);
+        Song song = findSongById(songId);
+        
+        if (user != null && song != null) {
+            user.addSong(song);
+            saveUsers();
+        }
+    }
+
+    public static synchronized void removeSongFromUser(int userId, int songId) {
+        User user = findUserById(userId);
+        Song song = findSongById(songId);
+        
+        if (user != null && song != null) {
+            if (user.getSongs() != null) {
+                user.getSongs().remove(song);
+                saveUsers();
+            }
+        }
+    }
+
+    public static synchronized List<Song> getUserSongs(int userId) {
+        User user = findUserById(userId);
+        if (user != null && user.getSongs() != null) {
+            return new ArrayList<>(user.getSongs());
+        }
+        return new ArrayList<>();
+    }
+
+    public static synchronized boolean userHasSong(int userId, int songId) {
+        User user = findUserById(userId);
+        Song song = findSongById(songId);
+        
+        if (user != null && song != null && user.getSongs() != null) {
+            return user.getSongs().contains(song);
+        }
+        return false;
+    }
+
+    public static synchronized void clearUserSongs(int userId) {
+        User user = findUserById(userId);
+        if (user != null && user.getSongs() != null) {
+            user.getSongs().clear();
+            saveUsers();
+        }
     }
 }
