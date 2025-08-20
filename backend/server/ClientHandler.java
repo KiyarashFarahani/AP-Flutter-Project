@@ -194,8 +194,13 @@ public class ClientHandler implements Runnable {
                         }
                     }
                     case "get_playlist_id_by_name" -> {
+                        User user = TokenManager.getUserByToken(token);
+                        if (user == null) {
+                            response =  new Response<>(401, null, "Invalid token");
+                            return;
+                        }
                         String name = gson.fromJson(gson.toJson(request.getData()), String.class);
-                        Playlist playlist = JsonDatabase.findPlaylistByName(name);
+                        Playlist playlist = JsonDatabase.findPlaylistByName(name, user.getId());
                         if (playlist != null) {
                             Map<String, Object> outData = new HashMap<>();
                             outData.put("playlist_id", playlist.getId());
