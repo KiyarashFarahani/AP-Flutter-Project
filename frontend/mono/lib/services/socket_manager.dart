@@ -11,6 +11,7 @@ class SocketManager {
   bool _isConnected = false;
   bool _isRequestInProgress = false;
   bool _isReconnecting = false;
+  bool _isSongRequestInProgress = false;
   Timer? _reconnectTimer;
   final List<String> _pendingRequests = [];
 
@@ -187,34 +188,91 @@ class SocketManager {
       }
     }
 
-  final completer = Completer<Uint8List?>();
-  final bytes = <int>[];
-  bool metadataReceived = false;
-
-  
-  void dataHandler(List<int> chunk) {
-    try {
-     
-      if (!metadataReceived) {
-        final jsonStr = utf8.decode(chunk);
-        final json = jsonDecode(jsonStr);
-        print("Metadata: $json");
-        metadataReceived = true;
-        return;
-      }
-    } catch (_) {
-      
-      bytes.addAll(chunk);
+    if (_isSongRequestInProgress) {
+      print('Cancelling previous song request');
+      _audioCallback = null;
+      await Future.delayed(Duration(milliseconds: 200));
     }
-  }
+    
+    _isSongRequestInProgress = true;
+    
+    final completer = Completer<Uint8List?>();
+    final bytes = <int>[];
+    bool metadataReceived = false;
+    bool isCompleted = false;
+    Timer? timeoutTimer;
 
-  _audioCallback = dataHandler;
-  _socket!.write(request + '\n');
-  await _socket!.flush();
+    //final String requestId = DateTime.now().millisecondsSinceEpoch.toString();
 
- 
-  await Future.delayed(Duration(seconds: 5));
-  _audioCallback = null;
+
+    void dataHandler(List<int> chunk) {
+      if (isCompleted) return;
+      
+      try {
+        if (!metadataReceived) {
+          final jsonStr = utf8.decode(chunk);
+          final json = jsonDecode(jsonStr);
+          print("Metadata: $json");
+          metadataReceived = true;
+          return;
+        }
+      } catch (_) {
+        bytes.addAll(chunk);
+      }
+    }
+
+    try {
+      _audioCallback = dataHandler;
+
+      _socket!.write(request + '\n');
+      await _socket!.flush();
+
+      timeoutTimer = Timer(Duration(seconds: 30), () {
+        if (!isCompleted) {
+          isCompleted = true;
+          _audioCallback = null;
+          _isSongRequestInProgress = false;
+          if (!completer.isCompleted) {
+            completer.complete(null);
+          }
+        }
+      });
+
+      int lastDataSize = 0;
+      int noDataCount = 0;
+      const int maxNoDataCount = 10; // 1 second without new data
+      
+      while (!isCompleted) {
+        await Future.delayed(Duration(milliseconds: 100));
+        
+        if (bytes.isNotEmpty) {
+          if (bytes.length == lastDataSize) {
+            noDataCount++;
+            if (noDataCount >= maxNoDataCount) {
+              break;
+            }
+          } else {
+            noDataCount = 0;
+            lastDataSize = bytes.length;
+          }
+        }
+        
+        if (bytes.isEmpty && noDataCount > 50) {
+          print("No data received for 5 seconds, breaking");
+          break;
+        }
+      }
+      
+    } catch (e) {
+      if (!completer.isCompleted) {
+        completer.complete(null);
+      }
+    } finally {
+      timeoutTimer?.cancel();
+      isCompleted = true;
+      _audioCallback = null;
+      _isSongRequestInProgress = false;
+    }
 
   if (bytes.isNotEmpty) {
     completer.complete(Uint8List.fromList(bytes));
@@ -267,6 +325,10 @@ class SocketManager {
 
   void dispose() {
     _reconnectTimer?.cancel();
+    _audioCallback = null;
+    _responseCallback = null;
+    _isSongRequestInProgress = false;
+    _isRequestInProgress = false;
     _socket?.destroy();
     _socket = null;
     _isConnected = false;

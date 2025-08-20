@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -22,17 +23,31 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   late final _socketManager;
   bool isPlaying = true;
   bool isLiked = false; // For animated favorite button
+  late StreamSubscription<PlayerState> _playerStateSubscription;
 
   @override
   void initState() {
     super.initState();
     _audioService = AudioService();
-    _audioService.playSong("PREMIERE  Cabaret Nocturne - Blind Trust.mp3");
+    if (widget.song.filename != null) {
+      _audioService.playSong(widget.song.filename!, 
+                           title: widget.song.title, 
+                           artist: widget.song.artist);
+    }
+    else print("Error: Song filename is null");
+
+    _playerStateSubscription = _audioService.player.onPlayerStateChanged.listen((state) {
+      if (mounted) {
+        setState(() {
+          isPlaying = state == PlayerState.playing;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
-    _audioService.dispose();
+    _playerStateSubscription.cancel();
     super.dispose();
   }
 
@@ -211,9 +226,11 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                         ),
                         onPressed: () async {
                           await _audioService.togglePlayPause();
-                          setState(() {});
+                          setState(() {
+                            isPlaying = _audioService.isPlaying;
+                          });
                         },
-                        child: _audioService.isPlaying ? const Icon(Icons.pause, size: 32,)
+                        child: isPlaying ? const Icon(Icons.pause, size: 32,)
                             : const Icon(Icons.play_arrow, size: 32),
                       ),
                       const SizedBox(width: 16),
