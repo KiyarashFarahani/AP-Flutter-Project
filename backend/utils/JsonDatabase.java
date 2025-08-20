@@ -148,9 +148,9 @@ public class JsonDatabase {
         return null;
     }
 
-    public static Playlist findPlaylistByName(String name) {
+    public static Playlist findPlaylistByName(String name, int id) {
         for(Playlist p: playlists) {
-            if(p.getName().equals(name)) return p;
+            if(p.getName().equals(name) && p.getOwner().getId() == id) return p;
         }
         return null;
     }

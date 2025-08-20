@@ -36,7 +36,7 @@ class _PlaylistsState extends State<Playlists> {
     if (tokenData == null || tokenData['token'] == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please login to add songs to your account'),
+          content: Text('You need to log in to manage playlists.'),
         ),
       );
       return;
@@ -51,9 +51,11 @@ class _PlaylistsState extends State<Playlists> {
       timeout: Duration(seconds: 10),
     );
     if (getPlaylistsResponse == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to get playlists')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Couldn’t load your playlists. Please try again.'),
+        ),
+      );
       return;
     }
     final getPlaylistsData = jsonDecode(getPlaylistsResponse);
@@ -76,7 +78,7 @@ class _PlaylistsState extends State<Playlists> {
       if (tokenData == null || tokenData['token'] == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please login to add songs to your account'),
+            content: Text('You need to log in to manage playlists.'),
           ),
         );
         return;
@@ -92,7 +94,7 @@ class _PlaylistsState extends State<Playlists> {
       );
       if (createPlaylistResponse == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to create playlist')),
+          const SnackBar(content: Text('Couldn’t create playlist.')),
         );
         return;
       }
@@ -102,8 +104,8 @@ class _PlaylistsState extends State<Playlists> {
           _playlists.add(playlist);
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Playlist created succesfully!'),
+          SnackBar(
+            content: Text('Playlist ${playlist.title} created successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -112,7 +114,7 @@ class _PlaylistsState extends State<Playlists> {
             createPLaylistData['message'] as String? ?? 'Unknown error';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create playlist: $errorMessage'),
+            content: Text('Couldn’t create playlist. ${errorMessage}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -130,7 +132,7 @@ class _PlaylistsState extends State<Playlists> {
     if (tokenData == null || tokenData['token'] == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please login to add songs to your account'),
+          content: Text('You need to log in to manage playlists.'),
         ),
       );
       return;
@@ -145,15 +147,17 @@ class _PlaylistsState extends State<Playlists> {
     );
     if (removePlaylistResponse == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to remove playlist')),
+        const SnackBar(
+          content: Text('Couldn’t remove playlist. Please try again.'),
+        ),
       );
       return;
     }
     final removePlaylistData = jsonDecode(removePlaylistResponse);
     if (removePlaylistData['status'] == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Playlist wad deleted successfully!'),
+        SnackBar(
+          content: Text('Playlist ${playlist.title} was removed.'),
           backgroundColor: Colors.green,
         ),
       );
@@ -185,7 +189,7 @@ class _PlaylistsState extends State<Playlists> {
     if (tokenData == null || tokenData['token'] == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please login to add songs to your account'),
+          content: Text('You need to log in to manage playlists.'),
         ),
       );
       return;
@@ -200,7 +204,7 @@ class _PlaylistsState extends State<Playlists> {
     );
     if (songIdResponse == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to get song information')),
+        SnackBar(content: Text('Couldn’t find details for ${song.title}')),
       );
       return;
     }
@@ -214,6 +218,7 @@ class _PlaylistsState extends State<Playlists> {
     final songId = songIdData['data']['song_id'] as int;
     final getPlaylistId = jsonEncode({
       "action": "get_playlist_id_by_name",
+      "token": tokenData['token'],
       "data": playlist.title,
     });
     final playlistIdResponse = await _socketManager.sendWithResponse(
@@ -222,7 +227,7 @@ class _PlaylistsState extends State<Playlists> {
     );
     if (playlistIdResponse == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to get playlist information')),
+        SnackBar(content: Text('Couldn’t find details for ${playlist.title}')),
       );
       return;
     }
@@ -247,15 +252,19 @@ class _PlaylistsState extends State<Playlists> {
     );
     if (removeSongResponse == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to remove song from playlist')),
+        SnackBar(
+          content: Text(
+            'Couldn’t remove ${song.title} from ${playlist.title}. Please try again.',
+          ),
+        ),
       );
       return;
     }
     final removeSongData = jsonDecode(removeSongResponse);
     if (removeSongData['status'] == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Song wad deleted successfully!'),
+        SnackBar(
+          content: Text('${song.title} removed from ${playlist.title}'),
           backgroundColor: Colors.green,
         ),
       );
@@ -274,6 +283,15 @@ class _PlaylistsState extends State<Playlists> {
 
   void _addSongToPlaylist(Playlist playlist, Song song) async {
     try {
+      final tokenData = await TokenStorage.getToken();
+      if (tokenData == null || tokenData['token'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You need to log in to manage playlists.'),
+          ),
+        );
+        return;
+      }
       final getSongId = jsonEncode({
         "action": "get_song_id_by_filename",
         "data": song.title,
@@ -284,7 +302,7 @@ class _PlaylistsState extends State<Playlists> {
       );
       if (songIdResponse == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to get song information')),
+          SnackBar(content: Text('Couldn’t find details for ${song.title}')),
         );
         return;
       }
@@ -298,6 +316,7 @@ class _PlaylistsState extends State<Playlists> {
       final songId = songIdData['data']['song_id'] as int;
       final getPlaylistId = jsonEncode({
         "action": "get_playlist_id_by_name",
+        "token": tokenData['token'],
         "data": playlist.title,
       });
       final playlistIdResponse = await _socketManager.sendWithResponse(
@@ -306,7 +325,9 @@ class _PlaylistsState extends State<Playlists> {
       );
       if (playlistIdResponse == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to get playlist information')),
+          SnackBar(
+            content: Text('Couldn’t find details for ${playlist.title}'),
+          ),
         );
         return;
       }
@@ -320,15 +341,6 @@ class _PlaylistsState extends State<Playlists> {
         return;
       }
       final playlistId = playlistIdData['data']['playlist_id'] as int;
-      final tokenData = await TokenStorage.getToken();
-      if (tokenData == null || tokenData['token'] == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please login to add songs to your account'),
-          ),
-        );
-        return;
-      }
       final addSongToPlaylist = jsonEncode({
         "action": "add_song_to_playlist",
         "token": tokenData['token'],
@@ -340,7 +352,9 @@ class _PlaylistsState extends State<Playlists> {
       );
       if (addSongToPlaylistResponse == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to add song to playlist')),
+          SnackBar(
+            content: Text('Couldn’t add ${song.title} to ${playlist.title}'),
+          ),
         );
         return;
       }
@@ -355,8 +369,8 @@ class _PlaylistsState extends State<Playlists> {
           }
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Song added to playlist successfully!'),
+          SnackBar(
+            content: Text('${song.title} added to ${playlist.title}'),
             backgroundColor: Colors.green,
           ),
         );
@@ -365,7 +379,9 @@ class _PlaylistsState extends State<Playlists> {
             addSongToPlaylistData['message'] as String? ?? 'Unknown error';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to add song to playlist: $errorMessage'),
+            content: Text(
+              'Couldn’t add ${song.title} to ${playlist.title} $errorMessage',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -379,8 +395,18 @@ class _PlaylistsState extends State<Playlists> {
   }
 
   void _sharePlaylist(String username, Playlist playlist) async {
+    final tokenData = await TokenStorage.getToken();
+    if (tokenData == null || tokenData['token'] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login to add songs to your account'),
+        ),
+      );
+      return;
+    }
     final getPlaylistId = jsonEncode({
       "action": "get_playlist_id_by_name",
+      "token": tokenData['token'],
       "data": playlist.title,
     });
     final playlistIdResponse = await _socketManager.sendWithResponse(
@@ -389,7 +415,7 @@ class _PlaylistsState extends State<Playlists> {
     );
     if (playlistIdResponse == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to get playlist information')),
+        SnackBar(content: Text('Couldn’t find details for ${playlist.title}')),
       );
       return;
     }
@@ -403,15 +429,7 @@ class _PlaylistsState extends State<Playlists> {
       return;
     }
     final playlistId = playlistIdData['data']['playlist_id'] as int;
-    final tokenData = await TokenStorage.getToken();
-    if (tokenData == null || tokenData['token'] == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please login to add songs to your account'),
-        ),
-      );
-      return;
-    }
+
     final sharePlaylist = jsonEncode({
       "action": "share_playlist",
       "token": tokenData['token'],
@@ -423,15 +441,17 @@ class _PlaylistsState extends State<Playlists> {
     );
     if (sharePlaylistResponse == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to share the playlist')),
+        SnackBar(
+          content: Text('Couldn’t share ${playlist.title} with $username.'),
+        ),
       );
       return;
     }
     final sharePlaylistData = jsonDecode(sharePlaylistResponse);
     if (sharePlaylistData['status'] == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Playlist was shared successfully!'),
+        SnackBar(
+          content: Text('${playlist.title} shared with ${username}'),
           backgroundColor: Colors.green,
         ),
       );
@@ -440,7 +460,9 @@ class _PlaylistsState extends State<Playlists> {
           sharePlaylistData['message'] as String? ?? 'Unknown error';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to share the playlist: $errorMessage'),
+          content: Text(
+            'Couldn’t share ${playlist.title} with $username: $errorMessage',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -507,7 +529,8 @@ class _PlaylistsState extends State<Playlists> {
                                     MaterialPageRoute(
                                       builder:
                                           (context) => SongsList(
-                                            removeSongFromPlaylist: _removeSongFromPLaylist,
+                                            removeSongFromPlaylist:
+                                                _removeSongFromPLaylist,
                                             addSongToPlaylist:
                                                 _addSongToPlaylist,
                                             playlist: _playlists[index],
