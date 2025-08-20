@@ -41,7 +41,7 @@ public class MetadataExtractor {
         return songs;
     }
 
-    private static Song extractMetadataFromFile(File musicFile) {
+    public static Song extractMetadataFromFile(File musicFile) {
         try {
             AudioFile audioFile = AudioFileIO.read(musicFile);
             Tag tag = audioFile.getTag();
