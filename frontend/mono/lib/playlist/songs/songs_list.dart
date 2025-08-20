@@ -9,9 +9,10 @@ import 'package:mono/playlist/songs/song_item.dart';
 
 
 class SongsList extends StatefulWidget {
-  const SongsList({required this.addSongToPlaylist,required this.playlist, required this.songs, super.key});
+  const SongsList({required this.addSongToPlaylist,required this.removeSongFromPlaylist,required this.playlist, required this.songs, super.key});
 
   final Function(Playlist, Song) addSongToPlaylist;
+  final Function(Playlist, Song) removeSongFromPlaylist;
   final Playlist playlist;
   final List<Song> songs;
   @override
@@ -22,11 +23,6 @@ class SongsList extends StatefulWidget {
 
 class _SongsListState extends State<SongsList> {
 
-  _removeSong(Song song) {
-    setState(() {
-      widget.songs.remove(song);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +68,7 @@ class _SongsListState extends State<SongsList> {
                     background: Container(color: colorScheme.errorContainer),
                     key: ValueKey(widget.songs[index]),
                     onDismissed: (direction) =>
-                        _removeSong(widget.songs[index]),
+                        widget.removeSongFromPlaylist(widget.playlist, widget.songs[index]),
                     child: SongItem(widget.songs[index]),
                   ),
                 ),

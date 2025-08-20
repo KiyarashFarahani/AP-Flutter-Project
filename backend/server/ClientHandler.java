@@ -4,8 +4,11 @@ import backend.controllers.SongController;
 import backend.controllers.UserController;
 import backend.dto.*;
 
+import backend.model.Playlist;
 import backend.model.Song;
+import backend.model.User;
 import backend.utils.JsonDatabase;
+import backend.utils.TokenManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -21,9 +24,7 @@ import org.jaudiotagger.tag.images.Artwork;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Base64;
 
 public class ClientHandler implements Runnable {
@@ -92,6 +93,33 @@ public class ClientHandler implements Runnable {
                     }
                     case "validate_token" -> {
                         response = userController.validateToken(token);
+                    }
+                    case "get_playlists" -> {
+                        User user = TokenManager.getUserByToken(token);
+                        if (user == null) {
+                            response =  new Response<>(401, null, "Invalid token");
+                            return;
+                        }
+                        JsonArray playlistsArray = new JsonArray();
+                        List<Playlist> playlists = JsonDatabase.loadPlaylists();
+                        for (Playlist p : playlists) {
+                            if (p.getOwner().getId() == user.getId() ) {
+                            JsonObject playlistObject = new JsonObject();
+                            playlistObject.addProperty("name", p.getName());
+
+                            JsonArray songsArray = new JsonArray();
+                            for (Song s : p.getSongs()) {
+                                JsonObject songObject = new JsonObject();
+                                songObject.addProperty("title", s.getTitle());
+                                songObject.addProperty("artist", s.getArtist());
+                                songsArray.add(songObject);
+                            }
+
+                            playlistObject.add("songs", songsArray);
+                            playlistsArray.add(playlistObject);
+                        }
+                        }
+                        response = new Response<>(200, playlistsArray, "Playlists listed successfully");
                     }
                     case "list_songs" -> {
                         File dir = new File(FileRequestHandler.MUSIC_DIR);
@@ -165,6 +193,19 @@ public class ClientHandler implements Runnable {
                             response = new Response<>(404, null, "Song not found");
                         }
                     }
+                    case "get_playlist_id_by_name" -> {
+                        String name = gson.fromJson(gson.toJson(request.getData()), String.class);
+                        Playlist playlist = JsonDatabase.findPlaylistByName(name);
+                        if (playlist != null) {
+                            Map<String, Object> outData = new HashMap<>();
+                            outData.put("playlist_id", playlist.getId());
+                            outData.put("name", playlist.getName());
+                            response = new Response<>(200, outData, "Playlist ID found");
+                        } else {
+                            response = new Response<>(404, null, "Playlist not found");
+                        }
+
+                    }
                     case "delete_account" -> {
                         DeleteAccountData data = gson.fromJson(gson.toJson(request.getData()), DeleteAccountData.class);
                         response = userController.deleteAccount(token, data.getPassword());
@@ -196,7 +237,7 @@ public class ClientHandler implements Runnable {
                     case "add_song_to_playlist" -> {
                         AddSongsToPlaylistData data = gson.fromJson(gson.toJson(request.getData()),
                                 AddSongsToPlaylistData.class);
-                        response = songController.addSongsToPlaylist(token, data.getPlaylistId(), data.getSongIds());
+                        response = songController.addSongToPlaylist(token, data.getPlaylistId(), data.getSongId());
                     }
                     case "delete_song_from_playlist" -> {
                         DeleteSongFromPlaylistData data = gson.fromJson(gson.toJson(request.getData()),
@@ -207,6 +248,26 @@ public class ClientHandler implements Runnable {
                         CreateNewPlaylistData data = gson.fromJson(gson.toJson(request.getData()),
                                 CreateNewPlaylistData.class);
                         response = songController.createPlaylist(token, data.getPlayListName());
+                    }
+                    case "delete_playlist" -> {
+                        User user = TokenManager.getUserByToken(token);
+                        if (user == null) {
+                            response =  new Response<>(401, null, "Invalid token");
+                            return;
+                        }
+                        DeletePlaylistData data = gson.fromJson(gson.toJson(request.getData()), DeletePlaylistData.class);
+                        List<Playlist> playlists = JsonDatabase.loadPlaylists();
+                        boolean isDeleted = false;
+                        for (Playlist p: playlists) {
+                            if (p.getOwner().getId() == user.getId() && data.getPlaylist().getName().equals(p.getName())) {
+                               isDeleted = JsonDatabase.deletePlaylist(p);
+                            }
+                        }
+                        if (isDeleted) {
+                            response = new Response<>(200, true, "Playlist was deleted successfully");
+                        } else {
+                            response = new Response<>(404, false, "Playlist was not deleted");
+                        }
                     }
                     case "add_song_to_user" -> {
                         AddSongToUserData data = gson.fromJson(gson.toJson(request.getData()), AddSongToUserData.class);

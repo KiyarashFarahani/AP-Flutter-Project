@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mono/models/playlist.dart';
 
 class NewPlaylist extends StatefulWidget {
-  NewPlaylist(this.addPlaylist, {required this.playlists, super.key});
-  void Function(Playlist playlist) addPlaylist;
-  List<Playlist> playlists;
+  const NewPlaylist(this.addPlaylist, {required this.playlists, super.key});
+  final void Function(Playlist playlist) addPlaylist;
+  final List<Playlist> playlists;
   @override
   State<StatefulWidget> createState() {
     return _NewPlaylistState();

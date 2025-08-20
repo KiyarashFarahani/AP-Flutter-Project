@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
@@ -6,6 +8,8 @@ import 'package:mono/models/song.dart';
 import 'package:mono/playlist/playlists/new_playlist.dart';
 import 'package:mono/playlist/songs/songs_list.dart';
 import 'package:mono/playlist/playlists/share_playlist.dart';
+import 'package:mono/services/token_storage.dart';
+import 'package:mono/services/socket_manager.dart';
 
 class Playlists extends StatefulWidget {
   const Playlists({super.key});
@@ -18,31 +22,147 @@ class Playlists extends StatefulWidget {
 enum AppPage { playlists, songsInPlaylists, home }
 
 class _PlaylistsState extends State<Playlists> {
-  final List<Playlist> _playlists = [
-    Playlist(
-      title: 'fav',
-      songs: [Song(title: 'Blind Trust', artist: 'mamad')],
-    ),
-    Playlist(
-      title: 'test',
-      songs: [
-        Song(title: '1', artist: 'mamad1'),
-        Song(title: '2', artist: 'mamad2'),
-      ],
-    ),
-  ];
+  final _socketManager = SocketManager();
+  List<Playlist> _playlists = [];
 
-  void _addPlaylist(Playlist playlist) {
-    setState(() {
-      _playlists.add(playlist);
-    });
+  @override
+  void initState() {
+    _getPlaylists();
+    super.initState();
   }
 
-  void _removePlaylist(Playlist playlist) {
-    final _playlistIndex = _playlists.indexOf(playlist);
-    setState(() {
-      _playlists.remove(playlist);
+  void _getPlaylists() async {
+    final tokenData = await TokenStorage.getToken();
+    if (tokenData == null || tokenData['token'] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login to add songs to your account'),
+        ),
+      );
+      return;
+    }
+    final getPlaylists = jsonEncode({
+      "action": "get_playlists",
+      "token": tokenData['token'],
+      "data": {"id": tokenData['userId']},
     });
+    final getPlaylistsResponse = await _socketManager.sendWithResponse(
+      getPlaylists,
+      timeout: Duration(seconds: 10),
+    );
+    if (getPlaylistsResponse == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to get playlists')));
+      return;
+    }
+    final getPlaylistsData = jsonDecode(getPlaylistsResponse);
+    if (getPlaylistsData['status'] == 200) {
+      List<dynamic> playlistsJson = getPlaylistsData['data'];
+      List<Playlist> playlists =
+          playlistsJson
+              .map((p) => Playlist.fromJson(p as Map<String, dynamic>))
+              .toList();
+
+      setState(() {
+        _playlists = playlists;
+      });
+    }
+  }
+
+  void _addPlaylist(Playlist playlist) async {
+    try {
+      final tokenData = await TokenStorage.getToken();
+      if (tokenData == null || tokenData['token'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please login to add songs to your account'),
+          ),
+        );
+        return;
+      }
+      final createPlaylist = jsonEncode({
+        "action": "create_playlist",
+        "token": tokenData['token'],
+        "data": {"name": playlist.title},
+      });
+      final createPlaylistResponse = await _socketManager.sendWithResponse(
+        createPlaylist,
+        timeout: Duration(seconds: 10),
+      );
+      if (createPlaylistResponse == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to create playlist')),
+        );
+        return;
+      }
+      final createPLaylistData = jsonDecode(createPlaylistResponse);
+      if (createPLaylistData['status'] == 200) {
+        setState(() {
+          _playlists.add(playlist);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Playlist created succesfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        final errorMessage =
+            createPLaylistData['message'] as String? ?? 'Unknown error';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create playlist: $errorMessage'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error craeting playlist: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  void _removePlaylist(Playlist playlist) async {
+    final tokenData = await TokenStorage.getToken();
+    if (tokenData == null || tokenData['token'] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login to add songs to your account'),
+        ),
+      );
+      return;
+    }
+    final removePlaylist = jsonEncode({
+      "action": "delete_playlist",
+      "token": tokenData['token'],
+      "data": {"playlist": playlist},
+    });
+    final removePlaylistResponse = await _socketManager.sendWithResponse(
+      removePlaylist,
+    );
+    if (removePlaylistResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to remove playlist')),
+      );
+      return;
+    }
+    final removePlaylistData = jsonDecode(removePlaylistResponse);
+    if (removePlaylistData['status'] == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Playlist wad deleted successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      setState(() {
+        _playlists.remove(playlist);
+      });
+    }
+
+    /*final _playlistIndex = _playlists.indexOf(playlist);
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -57,25 +177,274 @@ class _PlaylistsState extends State<Playlists> {
           },
         ),
       ),
-    );
+    );*/
   }
 
-  void _addNewPlaylis() {
+  void _removeSongFromPLaylist(Playlist playlist, Song song) async {
+    final tokenData = await TokenStorage.getToken();
+    if (tokenData == null || tokenData['token'] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login to add songs to your account'),
+        ),
+      );
+      return;
+    }
+    final getSongId = jsonEncode({
+      "action": "get_song_id_by_filename",
+      "data": song.title,
+    });
+    final songIdResponse = await _socketManager.sendWithResponse(
+      getSongId,
+      timeout: Duration(seconds: 10),
+    );
+    if (songIdResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to get song information')),
+      );
+      return;
+    }
+    final songIdData = jsonDecode(songIdResponse);
+    if (songIdData['status'] != 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Song not found: ${songIdData['message']}')),
+      );
+      return;
+    }
+    final songId = songIdData['data']['song_id'] as int;
+    final getPlaylistId = jsonEncode({
+      "action": "get_playlist_id_by_name",
+      "data": playlist.title,
+    });
+    final playlistIdResponse = await _socketManager.sendWithResponse(
+      getPlaylistId,
+      timeout: Duration(seconds: 10),
+    );
+    if (playlistIdResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to get playlist information')),
+      );
+      return;
+    }
+    final playlistIdData = jsonDecode(playlistIdResponse);
+    if (playlistIdData['status'] != 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Playlist not found: ${playlistIdData['message']}'),
+        ),
+      );
+      return;
+    }
+    final playlistId = playlistIdData['data']['playlist_id'] as int;
+    final removeSong = jsonEncode({
+      "action": "delete_song_from_playlist",
+      "token": tokenData['token'],
+      "data": {"playlist_id": playlistId, "song_id": songId},
+    });
+    final removeSongResponse = await _socketManager.sendWithResponse(
+      removeSong,
+      timeout: Duration(seconds: 10),
+    );
+    if (removeSongResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to remove song from playlist')),
+      );
+      return;
+    }
+    final removeSongData = jsonDecode(removeSongResponse);
+    if (removeSongData['status'] == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Song wad deleted successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      setState(() {
+        playlist.songs.remove(song);
+      });
+    }
+  }
+
+  void _addNewPlaylist() {
     showDialog(
       context: context,
       builder: (ctx) => NewPlaylist(_addPlaylist, playlists: _playlists),
     );
   }
 
-  void _addSongToPlaylist(Playlist playlist, Song song) {
-    setState(() {
-      for (Playlist p in _playlists) {
-        if (p == playlist) {
-          p.songs.add(song);
-          return;
-        }
+  void _addSongToPlaylist(Playlist playlist, Song song) async {
+    try {
+      final getSongId = jsonEncode({
+        "action": "get_song_id_by_filename",
+        "data": song.title,
+      });
+      final songIdResponse = await _socketManager.sendWithResponse(
+        getSongId,
+        timeout: Duration(seconds: 10),
+      );
+      if (songIdResponse == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to get song information')),
+        );
+        return;
       }
+      final songIdData = jsonDecode(songIdResponse);
+      if (songIdData['status'] != 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Song not found: ${songIdData['message']}')),
+        );
+        return;
+      }
+      final songId = songIdData['data']['song_id'] as int;
+      final getPlaylistId = jsonEncode({
+        "action": "get_playlist_id_by_name",
+        "data": playlist.title,
+      });
+      final playlistIdResponse = await _socketManager.sendWithResponse(
+        getPlaylistId,
+        timeout: Duration(seconds: 10),
+      );
+      if (playlistIdResponse == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to get playlist information')),
+        );
+        return;
+      }
+      final playlistIdData = jsonDecode(playlistIdResponse);
+      if (playlistIdData['status'] != 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Playlist not found: ${playlistIdData['message']}'),
+          ),
+        );
+        return;
+      }
+      final playlistId = playlistIdData['data']['playlist_id'] as int;
+      final tokenData = await TokenStorage.getToken();
+      if (tokenData == null || tokenData['token'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please login to add songs to your account'),
+          ),
+        );
+        return;
+      }
+      final addSongToPlaylist = jsonEncode({
+        "action": "add_song_to_playlist",
+        "token": tokenData['token'],
+        "data": {"playlist_id": playlistId, "song_id": songId},
+      });
+      final addSongToPlaylistResponse = await _socketManager.sendWithResponse(
+        addSongToPlaylist,
+        timeout: Duration(seconds: 10),
+      );
+      if (addSongToPlaylistResponse == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to add song to playlist')),
+        );
+        return;
+      }
+      final addSongToPlaylistData = jsonDecode(addSongToPlaylistResponse);
+      if (addSongToPlaylistData['status'] == 200) {
+        setState(() {
+          for (Playlist p in _playlists) {
+            if (p == playlist) {
+              p.songs.add(song);
+              return;
+            }
+          }
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Song added to playlist successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        final errorMessage =
+            addSongToPlaylistData['message'] as String? ?? 'Unknown error';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add song to playlist: $errorMessage'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error adding song to playlist: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  void _sharePlaylist(String username, Playlist playlist) async {
+    final getPlaylistId = jsonEncode({
+      "action": "get_playlist_id_by_name",
+      "data": playlist.title,
     });
+    final playlistIdResponse = await _socketManager.sendWithResponse(
+      getPlaylistId,
+      timeout: Duration(seconds: 10),
+    );
+    if (playlistIdResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to get playlist information')),
+      );
+      return;
+    }
+    final playlistIdData = jsonDecode(playlistIdResponse);
+    if (playlistIdData['status'] != 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Playlist not found: ${playlistIdData['message']}'),
+        ),
+      );
+      return;
+    }
+    final playlistId = playlistIdData['data']['playlist_id'] as int;
+    final tokenData = await TokenStorage.getToken();
+    if (tokenData == null || tokenData['token'] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login to add songs to your account'),
+        ),
+      );
+      return;
+    }
+    final sharePlaylist = jsonEncode({
+      "action": "share_playlist",
+      "token": tokenData['token'],
+      "data": {"recipient_username": username, "playlist_id": playlistId},
+    });
+    final sharePlaylistResponse = await _socketManager.sendWithResponse(
+      sharePlaylist,
+      timeout: Duration(seconds: 10),
+    );
+    if (sharePlaylistResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to share the playlist')),
+      );
+      return;
+    }
+    final sharePlaylistData = jsonDecode(sharePlaylistResponse);
+    if (sharePlaylistData['status'] == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Playlist was shared successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      final errorMessage =
+          sharePlaylistData['message'] as String? ?? 'Unknown error';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to share the playlist: $errorMessage'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -138,6 +507,7 @@ class _PlaylistsState extends State<Playlists> {
                                     MaterialPageRoute(
                                       builder:
                                           (context) => SongsList(
+                                            removeSongFromPlaylist: _removeSongFromPLaylist,
                                             addSongToPlaylist:
                                                 _addSongToPlaylist,
                                             playlist: _playlists[index],
@@ -187,7 +557,11 @@ class _PlaylistsState extends State<Playlists> {
                                         onPressed: () {
                                           showDialog(
                                             context: context,
-                                            builder: (ctx) => SharePlaylist(),
+                                            builder:
+                                                (ctx) => SharePlaylist(
+                                                  sharePlaylist: _sharePlaylist,
+                                                  playlist: _playlists[index],
+                                                ),
                                           );
                                         },
                                         icon: Icon(Icons.share),
@@ -207,7 +581,7 @@ class _PlaylistsState extends State<Playlists> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewPlaylis,
+        onPressed: _addNewPlaylist,
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 8,

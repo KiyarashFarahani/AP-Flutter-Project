@@ -133,12 +133,9 @@ public class JsonDatabase {
     }
 
     public static Song findSongByFilename(String filename) {
-        for(Song song : songs) {
-            if(song.getFilePath() != null) {
-                if(song.getFilePath().startsWith("data/musics/")) {
-                    String cleanPath = song.getFilePath().substring("data/musics/".length());
-                    if(cleanPath.equals(filename)) return song;
-                }
+        for(Song song: songs) {
+            if(song.getTitle().equals(filename)) {
+                return song;
             }
         }
         return null;
@@ -147,6 +144,13 @@ public class JsonDatabase {
     public static Playlist findPlaylistById(int playlistId) {
         for(Playlist playlist : playlists) {
             if(playlist.getId()==playlistId) return playlist;
+        }
+        return null;
+    }
+
+    public static Playlist findPlaylistByName(String name) {
+        for(Playlist p: playlists) {
+            if(p.getName().equals(name)) return p;
         }
         return null;
     }
@@ -161,6 +165,7 @@ public class JsonDatabase {
             return new ArrayList<>();
         }
     }
+
 
     public static void savePlaylists() {
         try(FileWriter writer= new FileWriter(PLAYLISTS_FILE)) {

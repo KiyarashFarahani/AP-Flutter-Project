@@ -57,7 +57,7 @@ public class SongController {
         return new Response<>(200, responseData, liked ? "Song unliked" : "Song liked");
     }
 
-    public Response<Map> addSongsToPlaylist(String token, int playlistId, Set<String> songIds) {
+    public Response<Map> addSongToPlaylist(String token, int playlistId, int songId) {
         User user = TokenManager.getUserByToken(token);
         if (user == null)
             return new Response<>(401, null, "Invalid token");
@@ -66,23 +66,18 @@ public class SongController {
         if (playlist == null || !Integer.valueOf(playlist.getOwnerId()).equals(user.getId()))
             return new Response<>(404, null, "Playlist not found");
 
-        List<Integer> addedSongs = new ArrayList<>();
-        for (String id : songIds) {
-            int intId = Integer.parseInt(id);
-            Song song = JsonDatabase.findSongById(intId);
-            if (song != null && !playlist.getSongIds().contains(intId)) {
+            Song song = JsonDatabase.findSongById(songId);
+            if (song != null && !playlist.getSongIds().contains(songId)) {
                 playlist.getSongs().add(song);
-                addedSongs.add(intId);
+                playlist.getSongIds().add(songId);
+                JsonDatabase.savePlaylists();
             }
-        }
-
-        JsonDatabase.savePlaylists();
 
         var data = new java.util.HashMap<String, Object>();
         data.put("playlist_id", playlistId);
-        data.put("added_songs", addedSongs);
+        data.put("added_song", song);
 
-        return new Response<>(200, data, "Songs added to playlist");
+        return new Response<>(200, data, "Song added to playlist");
     }
 
     public Response<Void> deleteSongFromPlaylist(String token, int playlistId, int songId) {
@@ -97,8 +92,9 @@ public class SongController {
         if (!playlist.getSongIds().contains(songId)) {
             return new Response<>(400, null, "Song not found in playlist");
         }
-
+        Song song = JsonDatabase.findSongById(songId);
         playlist.getSongIds().remove(songId);
+        playlist.getSongs().remove(song);
         JsonDatabase.savePlaylists();
         return new Response<>(200, null, "Song removed from playlist successfully");
     }

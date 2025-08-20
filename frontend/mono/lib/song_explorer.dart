@@ -302,7 +302,7 @@ class _SongExplorerState extends State<SongExplorer> {
                                           ),
                                           onTap: () async {
                                             Navigator.pop(context);
-                                            await _addSongToAccount(songs[index].filename!);
+                                            await _addSongToAccount(songs[index].title!);
                                           },
                                         ),
                                         ListTile(

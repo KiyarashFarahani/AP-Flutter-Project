@@ -8,14 +8,14 @@ import java.util.Set;
 public class AddSongsToPlaylistData {
     @SerializedName("playlist_id")
     private int playlistId;
-    @SerializedName("song_ids")
-    private Set<String> songIds;
+    @SerializedName("song_id")
+    private int songId;
 
     public AddSongsToPlaylistData() {}
 
-    public AddSongsToPlaylistData(int playlistId, Set<String> songIds) {
+    public AddSongsToPlaylistData(int playlistId, int songId) {
         this.playlistId = playlistId;
-        this.songIds = songIds;
+        this.songId = songId;
     }
 
     public int getPlaylistId() {
@@ -26,11 +26,11 @@ public class AddSongsToPlaylistData {
         this.playlistId = playlistId;
     }
 
-    public Set<String> getSongIds() {
-        return songIds;
+    public int getSongId() {
+        return songId;
     }
 
-    public void setSongIds(Set<String> songIds) {
-        this.songIds = songIds;
+    public void setSongId(int songId) {
+        this.songId = songId;
     }
 }

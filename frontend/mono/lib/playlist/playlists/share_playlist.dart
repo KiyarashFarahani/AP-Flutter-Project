@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mono/models/playlist.dart';
 
 class SharePlaylist extends StatefulWidget{
+  const SharePlaylist({required this.sharePlaylist,required this.playlist,super.key});
+  final void Function(String username, Playlist playlist) sharePlaylist;
+  final Playlist playlist;
   @override
   State<StatefulWidget> createState() {
     return _SharePlaylistState();
@@ -55,6 +59,7 @@ class _SharePlaylistState extends State<SharePlaylist> {
           ),
           onPressed: () {
             Navigator.pop(context);
+            widget.sharePlaylist(_usernameController.text, widget.playlist);
           },
           child: Text('Share'),
         ),
