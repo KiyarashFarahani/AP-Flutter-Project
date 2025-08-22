@@ -11,7 +11,6 @@ public class User {
     private int id;
     private String username;
     private String password;
-    private String email;
     private Theme theme;
     private boolean sharePermission;
     private String profileImageUrl;
@@ -65,7 +64,7 @@ public class User {
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, email);
+        return Objects.hash(username);
     }
 
     public void addSong(Song song) {
@@ -171,14 +170,6 @@ public class User {
 
     public void setLikedSongs(Set<Song> likedSongs) {
         this.likedSongs = likedSongs;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPassword() {
