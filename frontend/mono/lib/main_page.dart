@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mono/home.dart';
 import 'package:mono/playlist/playlists/playlists.dart';
 import 'package:mono/song_explorer.dart';
+import 'package:mono/account_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -27,7 +28,7 @@ class _MainPageState extends State<MainPage> {
     HomePage(),
     Playlists(),
     SongExplorer(),
-    //Profile()
+    AccountPage(),
   ];
 
   @override
