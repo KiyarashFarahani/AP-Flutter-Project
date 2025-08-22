@@ -36,4 +36,13 @@ public class Response<T> {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "Response{" +
+                "status=" + status +
+                ", data=" + data +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

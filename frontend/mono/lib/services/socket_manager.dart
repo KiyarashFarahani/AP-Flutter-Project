@@ -57,11 +57,11 @@ class SocketManager {
           try {
             final decoded = utf8.decode(data);
             final jsonData = jsonDecode(decoded);
-            _responseCallback?.call(jsonEncode(jsonData));
-          } catch (_) {
-               if (_audioCallback != null) {
-            _audioCallback!((data));
-          }
+            _responseCallback?.call(decoded);
+          } catch (e) {
+            if (_audioCallback != null) {
+              _audioCallback!(data);
+            }
           }
         },
         onDone: () {

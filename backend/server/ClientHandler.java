@@ -39,6 +39,60 @@ public class ClientHandler implements Runnable {
         this.socket = socket;
     }
 
+    private String serializeResponse(Response<?> response) {
+        try {
+            JsonObject jsonResponse = new JsonObject();
+            jsonResponse.addProperty("status", response.getStatus());
+            jsonResponse.addProperty("message", response.getMessage());
+            
+            if (response.getData() != null) {
+                if (response.getData() instanceof List) {
+                    List<?> dataList = (List<?>) response.getData();
+                    JsonArray jsonArray = new JsonArray();
+                    
+                    for (Object item : dataList) {
+                        if (item instanceof Song) {
+                            Song song = (Song) item;
+                            JsonObject songJson = new JsonObject();
+                            songJson.addProperty("id", song.getId());
+                            songJson.addProperty("title", song.getTitle());
+                            songJson.addProperty("artist", song.getArtist());
+                            songJson.addProperty("album", song.getAlbum());
+                            songJson.addProperty("genre", song.getGenre());
+                            songJson.addProperty("duration", song.getDuration());
+                            songJson.addProperty("year", song.getYear());
+                            songJson.addProperty("filePath", song.getFilePath());
+                            songJson.addProperty("coverArtUrl", song.getCoverArtUrl());
+                            songJson.addProperty("lyrics", song.getLyrics());
+                            songJson.addProperty("playCount", song.getPlayCount());
+                            songJson.addProperty("likes", song.getLikes());
+                            songJson.addProperty("isShareable", song.getIsShareable());
+                            jsonArray.add(songJson);
+                        } else {
+                            jsonArray.add(gson.toJsonTree(item));
+                        }
+                    }
+                    
+                    jsonResponse.add("data", jsonArray);
+                } else {
+                    jsonResponse.add("data", gson.toJsonTree(response.getData()));
+                }
+            } else {
+                jsonResponse.add("data", null);
+            }
+            
+            return gson.toJson(jsonResponse);
+        } catch (Exception e) {
+            System.err.println("Error serializing response: " + e.getMessage());
+            e.printStackTrace();
+            JsonObject fallback = new JsonObject();
+            fallback.addProperty("status", response.getStatus());
+            fallback.addProperty("message", response.getMessage());
+            fallback.add("data", null);
+            return gson.toJson(fallback);
+        }
+    }
+
     @Override
     public void run() {
         try (
@@ -258,20 +312,20 @@ public class ClientHandler implements Runnable {
                         User user = TokenManager.getUserByToken(token);
                         if (user == null) {
                             response =  new Response<>(401, null, "Invalid token");
-                            return;
-                        }
-                        DeletePlaylistData data = gson.fromJson(gson.toJson(request.getData()), DeletePlaylistData.class);
-                        List<Playlist> playlists = JsonDatabase.loadPlaylists();
-                        boolean isDeleted = false;
-                        for (Playlist p: playlists) {
-                            if (p.getOwner().getId() == user.getId() && data.getPlaylist().getName().equals(p.getName())) {
-                               isDeleted = JsonDatabase.deletePlaylist(p);
-                            }
-                        }
-                        if (isDeleted) {
-                            response = new Response<>(200, true, "Playlist was deleted successfully");
                         } else {
-                            response = new Response<>(404, false, "Playlist was not deleted");
+                            DeletePlaylistData data = gson.fromJson(gson.toJson(request.getData()), DeletePlaylistData.class);
+                            List<Playlist> playlists = JsonDatabase.loadPlaylists();
+                            boolean isDeleted = false;
+                            for (Playlist p: playlists) {
+                                if (p.getOwner().getId() == user.getId() && data.getPlaylist().getName().equals(p.getName())) {
+                                   isDeleted = JsonDatabase.deletePlaylist(p);
+                                }
+                            }
+                            if (isDeleted) {
+                                response = new Response<>(200, true, "Playlist was deleted successfully");
+                            } else {
+                                response = new Response<>(404, false, "Playlist was not deleted");
+                            }
                         }
                     }
                     case "add_song_to_user" -> {
@@ -320,7 +374,7 @@ public class ClientHandler implements Runnable {
                     }
                 }
 
-                String responseJson = gson.toJson(response);
+                String responseJson = serializeResponse(response);
                 System.out.println("Sending response: " + responseJson);
                 if (!socket.isClosed()) {
                     out.println(responseJson);

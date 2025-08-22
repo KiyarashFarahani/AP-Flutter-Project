@@ -84,11 +84,15 @@ class _HomePageState extends State<HomePage> {
     print('Starting to load songs...');
     try {
       final List<Song> list;
-      final listSongsRequest = jsonEncode({"action": "list_songs"});
-      print('Sending request: $listSongsRequest');
+      final token = await _getStoredToken();
+      final getUserSongsRequest = jsonEncode({
+        "action": "get_user_songs",
+        "token": token
+      });
+      print('Sending request: $getUserSongsRequest');
       
       final response = await _socketManager.sendWithResponse(
-        listSongsRequest,
+        getUserSongsRequest,
         timeout: Duration(seconds: 10),
       );
 
@@ -104,6 +108,10 @@ class _HomePageState extends State<HomePage> {
         list = dataList
             .map<Song>((item) => Song.fromJson(item as Map<String, dynamic>))
             .toList();
+        for(Song song in list){
+          //print('song: filename: ' + song.filename! + " path: " + song.filePath!);
+          song.filename = song.filePath!.replaceFirst('data/musics/', '');
+        }
       } catch (e) {
         print('JSON Parse Error: $e\nResponse: $response');
         throw Exception('Invalid server response');
@@ -497,108 +505,113 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       )
-                                        : songs.isEmpty
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.music_off,
-                                      size: 64,
-                                      color: Colors.white.withOpacity(0.7),
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          return _refreshAndReconnect();
+                        },
+                        color: Colors.white,
+                        backgroundColor: colorScheme.primary,
+                        child: songs.isEmpty
+                            ? ListView(
+                                children: [
+                                  SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                                  Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.music_off,
+                                          size: 64,
+                                          color: Colors.white.withOpacity(0.7),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'No songs found',
+                                          style: textTheme.headlineSmall?.copyWith(
+                                            color: Colors.white.withOpacity(0.7),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Add some songs to get started',
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: Colors.white.withOpacity(0.5),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      'No songs found',
-                                      style: textTheme.headlineSmall?.copyWith(
-                                        color: Colors.white.withOpacity(0.7),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Add some songs to get started',
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: Colors.white.withOpacity(0.5),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               )
-                        : RefreshIndicator(
-                            onRefresh: () async {
-                              return _refreshAndReconnect();
-                            },
-                            color: Colors.white,
-                            backgroundColor: colorScheme.primary,
-                            child: ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              itemCount: songs.length,
-                              itemBuilder: (context, index) => Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              elevation: 4,
-                              shadowColor: Colors.black.withOpacity(0.2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                leading: Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    Icons.music_note,
-                                    color: colorScheme.onPrimaryContainer,
-                                    size: 24,
-                                  ),
+                            : ListView.builder(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                itemCount: songs.length,
+                                itemBuilder: (context, index) => Card(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                elevation: 4,
+                                shadowColor: Colors.black.withOpacity(0.2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                                title: Text(
-                                  songs[index].title ?? 'Unknown Title',
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  songs[index].artist ?? 'Unknown Artist',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                trailing: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.primary,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Icon(
-                                    Icons.play_arrow,
-                                    color: colorScheme.onPrimary,
-                                    size: 20,
-                                  ),
-                                ),
-                                onTap: () {
-                                  if (widget.selectMode) {
-                                    Navigator.pop(context, songs[index]);
-                                  } else {
-                                      Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => NowPlayingPage(songs[index]),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                  leading: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  );
-                                  }
-                                  
-                                 },
+                                    child: Icon(
+                                      Icons.music_note,
+                                      color: colorScheme.onPrimaryContainer,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  title: Text(
+                                    songs[index].title ?? 'Unknown Title',
+                                    style: textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    songs[index].artist ?? 'Unknown Artist',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  trailing: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Icon(
+                                      Icons.play_arrow,
+                                      color: colorScheme.onPrimary,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    if (widget.selectMode) {
+                                      Navigator.pop(context, songs[index]);
+                                    } else {
+                                        Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => NowPlayingPage(songs[index]),
+                                      ),
+                                    );
+                                    }
+                                    
+                                   },
+                                ),
                               ),
                             ),
-                          ),
-                        ),
                       ),
+              )
             ],
           ),
         ],
