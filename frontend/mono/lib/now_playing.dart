@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:mono/services/audio_service.dart';
-import 'package:mono/services/socket_manager.dart';
 import 'package:mono/widgets/circular_icon_button.dart';
 
 import 'models/song.dart';
@@ -19,27 +16,59 @@ class NowPlayingPage extends StatefulWidget {
 }
 
 class _NowPlayingPageState extends State<NowPlayingPage> {
-  late final AudioService _audioService;
-  late final _socketManager;
+  late final AudioService audioService;
   bool isPlaying = true;
-  bool isLiked = false; // For animated favorite button
-  late StreamSubscription<PlayerState> _playerStateSubscription;
+  bool isLiked = false;
+  late StreamSubscription<PlayerState> playerStateSubscription;
+  late StreamSubscription<Duration> positionSubscription;
+  late StreamSubscription<Duration> durationSubscription;
+
+  Duration currentPosition = Duration.zero;
+  Duration totalDuration = Duration.zero;
 
   @override
   void initState() {
     super.initState();
-    _audioService = AudioService();
+    audioService = AudioService();
+
+    currentPosition = audioService.position;
+    totalDuration = audioService.duration;
+
+    if (widget.song.duration != null && widget.song.duration! > 0) {
+      totalDuration = Duration(seconds: widget.song.duration!);
+      audioService.setDuration(totalDuration);
+    }
+
     if (widget.song.filename != null) {
-      _audioService.playSong(widget.song.filename!, 
-                           title: widget.song.title, 
-                           artist: widget.song.artist);
+      audioService.playSong(
+        widget.song.filename!,
+        title: widget.song.title,
+        artist: widget.song.artist,
+        durationSeconds: widget.song.duration,
+      );
     }
     else print("Error: Song filename is null");
 
-    _playerStateSubscription = _audioService.player.onPlayerStateChanged.listen((state) {
+    playerStateSubscription = audioService.player.onPlayerStateChanged.listen((state) {
       if (mounted) {
         setState(() {
           isPlaying = state == PlayerState.playing;
+        });
+      }
+    });
+
+    positionSubscription = audioService.positionStream.listen((position) {
+      if (mounted) {
+        setState(() {
+          currentPosition = position;
+        });
+      }
+    });
+
+    durationSubscription = audioService.durationStream.listen((duration) {
+      if (mounted) {
+        setState(() {
+          totalDuration = duration;
         });
       }
     });
@@ -47,8 +76,17 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
 
   @override
   void dispose() {
-    _playerStateSubscription.cancel();
+    playerStateSubscription.cancel();
+    positionSubscription.cancel();
+    durationSubscription.cancel();
     super.dispose();
+  }
+
+  String formatTime(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
 
   @override
@@ -65,13 +103,11 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
       ),
       body: Stack(
         children: [
-          // Blurred background layer
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
             child: Container(color: Colors.black.withOpacity(0.25)),
           ),
 
-          // Gradient background
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -88,7 +124,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  // Album Art
                   ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: AspectRatio(
@@ -108,7 +143,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                           fit: StackFit.expand,
                           children: [
                             const Icon(Icons.music_note, size: 80),
-                            // Optional overlay gradient
                             Container(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
@@ -128,7 +162,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                   ),
                   const SizedBox(height: 28),
 
-                  // Song Title & Artist
                   Text(
                     widget.song.title ?? "Unknown Song",
                     style: textTheme.headlineSmall?.copyWith(
@@ -147,7 +180,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                   ),
                   const SizedBox(height: 36),
 
-                  // Action buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -178,7 +210,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
 
                   const SizedBox(height: 30),
 
-                  // Seek bar
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       thumbShape: const RoundSliderThumbShape(
@@ -189,8 +220,15 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                       ),
                     ),
                     child: Slider(
-                      value: 0.3,
-                      onChanged: (v) {},
+                      value: totalDuration.inSeconds > 0
+                          ? (currentPosition.inSeconds / totalDuration.inSeconds).clamp(0.0, 1.0)
+                          : 0.0,
+                      onChanged: totalDuration.inSeconds > 0 ? (value) {
+                        final newPos = Duration(
+                          seconds: (value * totalDuration.inSeconds).round(),
+                        );
+                        audioService.seekTo(newPos);
+                      } : null,
                       activeColor: colorScheme.primary,
                       inactiveColor: colorScheme.primary.withOpacity(0.3),
                     ),
@@ -198,14 +236,18 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("1:20", style: textTheme.labelSmall),
-                      Text("3:45", style: textTheme.labelSmall),
+                      Text(formatTime(currentPosition), style: textTheme.labelSmall),
+                      Text(
+                          totalDuration > Duration.zero
+                              ? formatTime(totalDuration)
+                              : '--:--',
+                          style: textTheme.labelSmall
+                      ),
                     ],
                   ),
 
                   const Spacer(),
 
-                  // Playback Controls
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -225,9 +267,9 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                           elevation: 6,
                         ),
                         onPressed: () async {
-                          await _audioService.togglePlayPause();
+                          await audioService.togglePlayPause();
                           setState(() {
-                            isPlaying = _audioService.isPlaying;
+                            isPlaying = audioService.isPlaying;
                           });
                         },
                         child: isPlaying ? const Icon(Icons.pause, size: 32,)
