@@ -41,6 +41,7 @@ class Song {
 
   factory Song.fromJson(Map<String, dynamic> json) => Song(
     id: json['id'],
+    filename: json['filename'],
     title: json['title'],
     artist: json['artist'],
     album: json['album'],
@@ -65,6 +66,7 @@ class Song {
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    'filename': filename,
     'title': title,
     'artist': artist,
     'album': album,
