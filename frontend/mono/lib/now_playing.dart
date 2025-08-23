@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:mono/services/audio_service.dart';
+import 'package:mono/services/socket_manager.dart';
+import 'package:mono/services/token_storage.dart';
 import 'package:mono/widgets/circular_icon_button.dart';
+import 'package:mono/widgets/share_song_dialog.dart';
 
 import 'models/song.dart';
 
@@ -17,8 +21,10 @@ class NowPlayingPage extends StatefulWidget {
 
 class _NowPlayingPageState extends State<NowPlayingPage> {
   late final AudioService audioService;
+  final SocketManager socketManager = SocketManager();
   bool isPlaying = true;
   bool isLiked = false;
+  bool isLikeLoading = false;
   late StreamSubscription<PlayerState> playerStateSubscription;
   late StreamSubscription<Duration> positionSubscription;
   late StreamSubscription<Duration> durationSubscription;
@@ -30,6 +36,8 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   void initState() {
     super.initState();
     audioService = AudioService();
+
+    _initializeLikeStatus();
 
     currentPosition = audioService.position;
     totalDuration = audioService.duration;
@@ -80,6 +88,207 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     positionSubscription.cancel();
     durationSubscription.cancel();
     super.dispose();
+  }
+
+  void _initializeLikeStatus() async {
+    try {
+      final tokenData = await TokenStorage.getToken();
+      if (tokenData != null && widget.song.likedByUsers != null) {
+        final currentUserId = tokenData['userId'].toString();
+        setState(() {
+          isLiked = widget.song.likedByUsers!.contains(currentUserId);
+        });
+      }
+    } catch (e) {
+      // Error initializing like status
+    }
+  }
+
+
+
+  Future<int?> _getSongIdByTitle(String title) async {
+    try {
+      final tokenData = await TokenStorage.getToken();
+      if (tokenData == null) return null;
+
+      await socketManager.connect();
+
+      final request = jsonEncode({
+        "action": "get_song_id_by_filename",
+        "token": tokenData['token'],
+        "data": title
+      });
+
+      final response = await socketManager.sendWithResponse(
+        request,
+        timeout: const Duration(seconds: 10),
+      );
+
+      if (response == null) {
+        return null;
+      }
+
+      final responseData = jsonDecode(response);
+
+      if (responseData['status'] == 200) {
+        final songId = responseData['data']['song_id'] as int;
+        return songId;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> _toggleLike() async {
+    if (isLikeLoading) {
+      return;
+    }
+
+    int? songId = widget.song.id;
+    if (songId == null && widget.song.title != null) {
+      songId = await _getSongIdByTitle(widget.song.title!);
+      if (songId == null) {
+        _showSnackBar('Unable to identify song for liking');
+        return;
+      }
+    } else if (songId == null) {
+      _showSnackBar('Cannot like this song - no identifier available');
+      return;
+    }
+
+    setState(() {
+      isLikeLoading = true;
+    });
+
+    try {
+      final tokenData = await TokenStorage.getToken();
+      if (tokenData == null) {
+        _showSnackBar('Please log in to like songs');
+        return;
+      }
+
+      await socketManager.connect();
+
+      final likeRequest = jsonEncode({
+        "action": "toggle_like_song",
+        "token": tokenData['token'],
+        "data": songId
+      });
+
+      final response = await socketManager.sendWithResponse(
+        likeRequest,
+        timeout: const Duration(seconds: 10),
+      );
+
+      if (response == null) {
+        _showSnackBar('Failed to like song. Please try again.');
+        return;
+      }
+
+      final responseData = jsonDecode(response);
+
+      if (responseData['status'] == 200) {
+        final wasLiked = responseData['data']['liked'] as bool;
+
+        setState(() {
+          isLiked = !wasLiked;
+        });
+
+        _showSnackBar(
+            isLiked ? 'Added to liked songs' : 'Removed from liked songs'
+        );
+      } else {
+        final errorMessage = responseData['message'] as String? ?? 'Unknown error';
+        _showSnackBar('Error: $errorMessage');
+      }
+    } catch (e) {
+      _showSnackBar('Failed to like song. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLikeLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _shareSong(String username, Song song) async {
+    int? songId = song.id;
+    if (songId == null && song.title != null) {
+      songId = await _getSongIdByTitle(song.title!);
+      if (songId == null) {
+        _showSnackBar('Unable to identify song for sharing');
+        return;
+      }
+    } else if (songId == null) {
+      _showSnackBar('Cannot share this song - no identifier available');
+      return;
+    }
+
+    try {
+      final tokenData = await TokenStorage.getToken();
+      if (tokenData == null) {
+        _showSnackBar('Please log in to share songs');
+        return;
+      }
+
+      await socketManager.connect();
+
+      final shareRequest = jsonEncode({
+        "action": "share_song",
+        "token": tokenData['token'],
+        "data": {
+          "recipient_username": username,
+          "song_id": songId,
+        }
+      });
+
+      final response = await socketManager.sendWithResponse(
+        shareRequest,
+        timeout: const Duration(seconds: 10),
+      );
+
+      if (response == null) {
+        _showSnackBar('Failed to share song. Please try again.');
+        return;
+      }
+
+      final responseData = jsonDecode(response);
+      if (responseData['status'] == 200) {
+        _showSnackBar('Song shared with $username successfully!');
+      } else {
+        final errorMessage = responseData['message'] as String? ?? 'Unknown error';
+        _showSnackBar('Failed to share song: $errorMessage');
+      }
+    } catch (e) {
+      print('Error sharing song: $e');
+      _showSnackBar('Failed to share song. Please try again.');
+    }
+  }
+
+  void _showShareDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ShareSongDialog(
+          shareSong: _shareSong,
+          song: widget.song,
+        );
+      },
+    );
+  }
+
+  void _showSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   String formatTime(Duration duration) {
@@ -184,18 +393,16 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       CircularIconButton(
-                        icon: isLiked ? Icons.favorite : Icons.favorite_border,
-                        onPressed: () {
-                          setState(() {
-                            isLiked = !isLiked;
-                          });
-                        },
+                        icon: isLikeLoading
+                            ? Icons.hourglass_empty
+                            : (isLiked ? Icons.favorite : Icons.favorite_border),
+                        onPressed: isLikeLoading ? null : () => _toggleLike(),
                         backgroundColor: colorScheme.onPrimary,
                         iconColor: isLiked ? Colors.red : colorScheme.primary,
                       ),
                       CircularIconButton(
                         icon: Icons.share,
-                        onPressed: () {},
+                        onPressed: _showShareDialog,
                         backgroundColor: colorScheme.onPrimary,
                         iconColor: colorScheme.primary,
                       ),

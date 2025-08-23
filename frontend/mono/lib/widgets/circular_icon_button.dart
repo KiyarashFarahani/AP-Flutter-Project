@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 class CircularIconButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color backgroundColor;
   final Color iconColor;
 
   const CircularIconButton({
     super.key,
     required this.icon,
-    required this.onPressed,
+    this.onPressed,
     required this.backgroundColor,
     required this.iconColor,
   });
