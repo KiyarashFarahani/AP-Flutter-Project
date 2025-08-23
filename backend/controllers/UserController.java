@@ -163,7 +163,6 @@ public class UserController {
         }
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("username", user.getUsername());
-        userInfo.put("email", user.getEmail());
         userInfo.put("theme", user.getTheme());
         userInfo.put("share_permission", user.isSharePermission());
         userInfo.put("profile_image_url", user.getProfileImageUrl());
