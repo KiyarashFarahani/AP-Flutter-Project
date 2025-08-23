@@ -28,6 +28,9 @@ A cross-platform music streaming application, built with Flutter and Java.
 
 ### Admin Panel
 *Screenshots uploading soon*
+![Admin Panel 1](screenshots/Backend/Admin-Panel-1.png)
+![Admin Panel 2](screenshots/Backend/Admin-Panel-2.png)
+![Admin Panel 3](screenshots/Backend/Admin-Panel-3.png)
 
 ## 📁 Project Structure
 
