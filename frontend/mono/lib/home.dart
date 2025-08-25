@@ -13,7 +13,7 @@ import 'song_explorer.dart';
 import 'main_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key,  this.selectMode = false}) : super(key: key);
+  const HomePage({Key? key, this.selectMode = false}) : super(key: key);
   final bool selectMode;
 
   @override
@@ -21,7 +21,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
   final _socketManager = SocketManager();
   List<Song> songs = [];
   String filter = 'Date';
@@ -42,19 +41,17 @@ class _HomePageState extends State<HomePage> {
       print('attempt $attempts / 10');
 
       if (!_socketManager.isConnected) {
-
         try {
           await _socketManager.connect();
           await Future.delayed(Duration(milliseconds: 500));
-        }
-        catch (e) {
+        } catch (e) {
           print('Connection attempt $attempts failed: $e');
         }
       }
-      
+
       await Future.delayed(Duration(milliseconds: 500));
     }
-    
+
     if (_socketManager.isConnected) {
       print('Socket connected, loading songs...');
       await _loadSongs();
@@ -87,10 +84,10 @@ class _HomePageState extends State<HomePage> {
       final token = await _getStoredToken();
       final getUserSongsRequest = jsonEncode({
         "action": "get_user_songs",
-        "token": token
+        "token": token,
       });
       print('Sending request: $getUserSongsRequest');
-      
+
       final response = await _socketManager.sendWithResponse(
         getUserSongsRequest,
         timeout: Duration(seconds: 10),
@@ -98,17 +95,20 @@ class _HomePageState extends State<HomePage> {
 
       print('Received response: $response');
       if (response == null) throw Exception("No response from server");
-      
+
       try {
         final Map<String, dynamic> jsonMap = jsonDecode(response);
         print('Parsed JSON: $jsonMap');
         final List<dynamic> dataList = jsonMap['data'] ?? [];
         print('Data list: $dataList');
-        
-        list = dataList
-            .map<Song>((item) => Song.fromJson(item as Map<String, dynamic>))
-            .toList();
-        for(Song song in list){
+
+        list =
+            dataList
+                .map<Song>(
+                  (item) => Song.fromJson(item as Map<String, dynamic>),
+                )
+                .toList();
+        for (Song song in list) {
           //print('song: filename: ' + song.filename! + " path: " + song.filePath!);
           song.filename = song.filePath!.replaceFirst('data/musics/', '');
         }
@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage> {
         print('JSON Parse Error: $e\nResponse: $response');
         throw Exception('Invalid server response');
       }
-      
+
       setState(() {
         songs = list;
         isLoading = false;
@@ -134,56 +134,59 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[400],
-                borderRadius: BorderRadius.circular(2),
+      builder:
+          (_) => Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
             ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: Icon(
-                Icons.folder,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              title: const Text('Add from local files'),
-              onTap: () async {
-                Navigator.pop(context);
-                await _pickAndUploadSong();
-              },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: Icon(
+                    Icons.folder,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: const Text('Add from local files'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await _pickAndUploadSong();
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.cloud_download,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: const Text('Choose from server'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showServerSongPicker();
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
-            ListTile(
-              leading: Icon(
-                Icons.cloud_download,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              title: const Text('Choose from server'),
-              onTap: () {
-                Navigator.pop(context);
-                _showServerSongPicker();
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
   void _sortSongs() {
     if (songs.isEmpty) return;
-    
+
     setState(() {
       if (filter == 'Date') {
         songs = songs.reversed.toList();
@@ -203,7 +206,7 @@ class _HomePageState extends State<HomePage> {
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
-        
+
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -242,9 +245,11 @@ class _HomePageState extends State<HomePage> {
               print('Error reading file from path: $e');
             }
           }
-          
+
           if (bytes != null && bytes.isNotEmpty) {
-            print('File read successfully: ${file.name}, size: ${bytes.length} bytes');
+            print(
+              'File read successfully: ${file.name}, size: ${bytes.length} bytes',
+            );
             final success = await _socketManager.uploadSong(
               file.name,
               bytes,
@@ -265,12 +270,14 @@ class _HomePageState extends State<HomePage> {
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Upload response unclear. Checking if file was received...'),
+                  content: Text(
+                    'Upload response unclear. Checking if file was received...',
+                  ),
                   backgroundColor: Colors.orange,
                   duration: Duration(seconds: 3),
                 ),
               );
-              
+
               await Future.delayed(Duration(seconds: 2));
               await _loadSongs();
             }
@@ -284,7 +291,7 @@ class _HomePageState extends State<HomePage> {
             } else if (file.path != null) {
               errorMessage += 'File path is invalid or file does not exist.';
             }
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(errorMessage),
@@ -324,7 +331,7 @@ class _HomePageState extends State<HomePage> {
 
     if (!_socketManager.isConnected) {
       print('Socket disconnected, attempting to reconnect...');
-      
+
       try {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -336,7 +343,7 @@ class _HomePageState extends State<HomePage> {
 
         await _socketManager.connect();
         await Future.delayed(Duration(milliseconds: 500));
-        
+
         if (_socketManager.isConnected) {
           print('Successfully reconnected to server');
           ScaffoldMessenger.of(context).showSnackBar(
@@ -350,7 +357,9 @@ class _HomePageState extends State<HomePage> {
           print('Failed to reconnect to server');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to reconnect. Please check your connection.'),
+              content: Text(
+                'Failed to reconnect. Please check your connection.',
+              ),
               backgroundColor: Colors.red,
               duration: Duration(seconds: 3),
             ),
@@ -428,9 +437,10 @@ class _HomePageState extends State<HomePage> {
                       height: 8,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _socketManager.isConnected 
-                            ? Colors.green 
-                            : Colors.red,
+                        color:
+                            _socketManager.isConnected
+                                ? Colors.green
+                                : Colors.red,
                       ),
                     ),
                   ],
@@ -445,25 +455,27 @@ class _HomePageState extends State<HomePage> {
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: filter,
-                        icon: Icon(
-                          Icons.filter_list,
-                          color: Colors.white,
+                        icon: Icon(Icons.filter_list, color: Colors.white),
+                        dropdownColor: colorScheme.primaryContainer.withOpacity(
+                          0.9,
                         ),
-                        dropdownColor: colorScheme.primaryContainer.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(12),
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        items: ['Date', 'Alphabetical']
-                            .map((e) => DropdownMenuItem(
-                          value: e,
-                          child: Text(
-                            e,
-                            style: TextStyle(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ))
-                            .toList(),
+                        items:
+                            ['Date', 'Alphabetical']
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(
+                                      e,
+                                      style: TextStyle(
+                                        color: colorScheme.onSurface,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                         onChanged: (val) {
                           if (val != null) {
                             setState(() => filter = val);
@@ -476,142 +488,362 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               Expanded(
-                child: isLoading
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              _socketManager.isConnected 
-                                  ? 'Loading your songs...'
-                                  : 'Connecting to server...',
-                              style: textTheme.bodyLarge?.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                            if (!_socketManager.isConnected) ...[
-                              const SizedBox(height: 8),
+                child:
+                    isLoading
+                        ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(color: Colors.white),
+                              const SizedBox(height: 16),
                               Text(
-                                'Please wait while we establish connection',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white.withOpacity(0.7),
+                                _socketManager.isConnected
+                                    ? 'Loading your songs...'
+                                    : 'Connecting to server...',
+                                style: textTheme.bodyLarge?.copyWith(
+                                  color: Colors.white,
                                 ),
                               ),
+                              if (!_socketManager.isConnected) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Please wait while we establish connection',
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white.withOpacity(0.7),
+                                  ),
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: () async {
-                          return _refreshAndReconnect();
-                        },
-                        color: Colors.white,
-                        backgroundColor: colorScheme.primary,
-                        child: songs.isEmpty
-                            ? ListView(
-                                children: [
-                                  SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-                                  Center(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.music_off,
-                                          size: 64,
-                                          color: Colors.white.withOpacity(0.7),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          'No songs found',
-                                          style: textTheme.headlineSmall?.copyWith(
-                                            color: Colors.white.withOpacity(0.7),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Add some songs to get started',
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            color: Colors.white.withOpacity(0.5),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                itemCount: songs.length,
-                                itemBuilder: (context, index) => Card(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                elevation: 4,
-                                shadowColor: Colors.black.withOpacity(0.2),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                  leading: Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primaryContainer,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.music_note,
-                                      color: colorScheme.onPrimaryContainer,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  title: Text(
-                                    songs[index].title ?? 'Unknown Title',
-                                    style: textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: colorScheme.onSurface,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    songs[index].artist ?? 'Unknown Artist',
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  trailing: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Icon(
-                                      Icons.play_arrow,
-                                      color: colorScheme.onPrimary,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    if (widget.selectMode) {
-                                      Navigator.pop(context, songs[index]);
-                                    } else {
-                                        Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => NowPlayingPage(songs[index]),
+                          ),
+                        )
+                        : RefreshIndicator(
+                          onRefresh: () async {
+                            return _refreshAndReconnect();
+                          },
+                          color: Colors.white,
+                          backgroundColor: colorScheme.primary,
+                          child:
+                              songs.isEmpty
+                                  ? ListView(
+                                    children: [
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                            0.3,
                                       ),
-                                    );
-                                    }
-                                    
-                                   },
-                                ),
-                              ),
-                            ),
-                      ),
-              )
+                                      Center(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.music_off,
+                                              size: 64,
+                                              color: Colors.white.withOpacity(
+                                                0.7,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Text(
+                                              'No songs found',
+                                              style: textTheme.headlineSmall
+                                                  ?.copyWith(
+                                                    color: Colors.white
+                                                        .withOpacity(0.7),
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Add some songs to get started',
+                                              style: textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                    color: Colors.white
+                                                        .withOpacity(0.5),
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                  : ListView.builder(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    itemCount: songs.length,
+                                    itemBuilder: (context, index) {
+                                      final song = songs[index];
+
+                                      return Dismissible(
+                                        key: ValueKey(
+                                          song.filename ?? index,
+                                        ), // unique key for each item
+                                        direction:
+                                            DismissDirection
+                                                .endToStart, // swipe left to delete
+                                        background: Container(
+                                          alignment: Alignment.centerRight,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.delete,
+                                            color: Colors.white,
+                                            size: 28,
+                                          ),
+                                        ),
+                                        confirmDismiss: (direction) async {
+                                          // Ask confirmation before deleting
+                                          return await showDialog(
+                                            context: context,
+                                            builder:
+                                                (ctx) => AlertDialog(
+                                                  title: const Text(
+                                                    "Delete Song",
+                                                  ),
+                                                  content: Text(
+                                                    "Are you sure you want to delete '${song.title ?? 'this song'}'?",
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed:
+                                                          () => Navigator.of(
+                                                            ctx,
+                                                          ).pop(false),
+                                                      child: const Text(
+                                                        "Cancel",
+                                                      ),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed:
+                                                          () => Navigator.of(
+                                                            ctx,
+                                                          ).pop(true),
+                                                      child: const Text(
+                                                        "Delete",
+                                                        style: TextStyle(
+                                                          color: Colors.red,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                          );
+                                        },
+                                        onDismissed: (direction) async {
+                                          final tokenData =
+                                              await TokenStorage.getToken();
+                                          if (tokenData == null ||
+                                              tokenData['token'] == null) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'You need to log in to manage playlists.',
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                          final getSongId = jsonEncode({
+                                            "action": "get_song_id_by_filename",
+                                            "data": song.title,
+                                          });
+                                          final songIdResponse =
+                                              await _socketManager
+                                                  .sendWithResponse(
+                                                    getSongId,
+                                                    timeout: Duration(
+                                                      seconds: 10,
+                                                    ),
+                                                  );
+                                          if (songIdResponse == null) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Couldn’t find details for ${song.title}',
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                          final songIdData = jsonDecode(
+                                            songIdResponse,
+                                          );
+                                          if (songIdData['status'] != 200) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Song not found: ${songIdData['message']}',
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                          final songId =
+                                              songIdData['data']['song_id']
+                                                  as int;
+                                          final removeSongRequest = jsonEncode({
+                                            "action": "remove_song_from_user",
+                                            "token": tokenData['token'],
+                                            "data": {
+                                              "songId": songId
+                                            },
+                                          });
+                                          final removeSongResponse =
+                                              await _socketManager
+                                                  .sendWithResponse(
+                                                    removeSongRequest,
+                                                    timeout: Duration(
+                                                      seconds: 10,
+                                                    ),
+                                                  );
+                                          if (removeSongResponse == null) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Couldn’t find details for ${song.title}',
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                          final removeSongData = jsonDecode(
+                                            removeSongResponse,
+                                          );
+                                          if (removeSongData['status'] != 200) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Song not found: ${removeSongData['message']}',
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          setState(() {
+                                            songs.removeAt(index);
+                                          });
+
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "'${song.title ?? 'Song'}' deleted",
+                                              ),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        },
+                                        child: Card(
+                                          margin: const EdgeInsets.only(
+                                            bottom: 12,
+                                          ),
+                                          elevation: 4,
+                                          shadowColor: Colors.black.withOpacity(
+                                            0.2,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                          child: ListTile(
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 20,
+                                                  vertical: 8,
+                                                ),
+                                            leading: Container(
+                                              width: 48,
+                                              height: 48,
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    colorScheme
+                                                        .primaryContainer,
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Icon(
+                                                Icons.music_note,
+                                                color:
+                                                    colorScheme
+                                                        .onPrimaryContainer,
+                                                size: 24,
+                                              ),
+                                            ),
+                                            title: Text(
+                                              song.title ?? 'Unknown Title',
+                                              style: textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        colorScheme.onSurface,
+                                                  ),
+                                            ),
+                                            subtitle: Text(
+                                              song.artist ?? 'Unknown Artist',
+                                              style: textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        colorScheme
+                                                            .onSurfaceVariant,
+                                                  ),
+                                            ),
+                                            trailing: Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                color: colorScheme.primary,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: Icon(
+                                                Icons.play_arrow,
+                                                color: colorScheme.onPrimary,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            onTap: () {
+                                              if (widget.selectMode) {
+                                                Navigator.pop(context, song);
+                                              } else {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (_) => NowPlayingPage(
+                                                          song,
+                                                        ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                        ),
+              ),
             ],
           ),
         ],
